@@ -31,7 +31,7 @@ shinyUI(fluidPage(
                  conditionalPanel(
                    condition = "input.n_l_cov > 0",
                    h4(strong("Latente Kovariate 1")),
-                   fluidRow(column(6, numericInput(inputId="mean_xi1", label=h5(paste0("Mittelwert von Xi", tags$sub(1))),
+                   fluidRow(column(6, numericInput(inputId="mean_xi1", label=h5("Mittelwert von Xi1"),
                                                    value=0, width='100%', min=100, max=100)),
                             column(6, sliderInput(inputId="sd_xi1", label=h5("Standardabweichung von Xi1"),
                                                   value=1, min=0.001, max=4))

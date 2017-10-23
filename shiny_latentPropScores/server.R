@@ -10,20 +10,20 @@ shinyServer(
         numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)
       }else if(n_m_cov()==1 & n_l_cov()==2){
         fluidRow(column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)),
-                 column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi2)", value=0)),
-                 column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi2)", value=0)))
+                 column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi\u2082)", value=0)),
+                 column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0)))
       }else if(n_m_cov()==2 & n_l_cov()==2){
         tagList(
-          fluidRow(column(4, numericInput(inputId="cov_z1_z2", label="Cov(Z\u2081, Z2)", value=0)),
+          fluidRow(column(4, numericInput(inputId="cov_z1_z2", label="Cov(Z\u2081, Z\u2082)", value=0)),
                    column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)),
-                   column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi2)", value=0))),
-          fluidRow(column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi2)", value=0)),
-                   column(4, numericInput(inputId="cov_z2_xi1", label="Cov(Z2, Xi\u2081)", value=0)),
-                   column(4, numericInput(inputId="cov_z2_xi2", label="Cov(Z2, Xi2)", value=0))
+                   column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi\u2082)", value=0))),
+          fluidRow(column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0)),
+                   column(4, numericInput(inputId="cov_z2_xi1", label="Cov(Z\u2082, Xi\u2081)", value=0)),
+                   column(4, numericInput(inputId="cov_z2_xi2", label="Cov(Z\u2082, Xi\u2082)", value=0))
                    )
         )
       }else if(n_m_cov()==0 & n_l_cov()==2){
-        numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi2)", value=0)
+        numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0)
       }
     })
     
@@ -74,7 +74,7 @@ shinyServer(
         )
       }else if(n_m_cov() == 1 & n_l_cov() == 2){
         tagList(
-          p("E(Y|Z\u2081, Xi\u2081, Xi2) = "),
+          p("E(Y|Z\u2081, Xi\u2081, Xi\u2082) = "),
           br(),
           # baseline function g0 (regression in group X=0)
           fluidRow(column(2, p("\u03B3_000")),
@@ -122,7 +122,7 @@ shinyServer(
         )
       }else if(n_m_cov() == 2 & n_l_cov() == 2){
         tagList(
-          p("E(Y|Z\u2081, Z2, Xi\u2081, Xi2) = "),
+          p("E(Y|Z\u2081, Z\u2082, Xi\u2081, Xi\u2082) = "),
           br(),
           # baseline function g0 (regression in group X=0)
           fluidRow(column(2, p("\u03B3_000")),
@@ -184,7 +184,7 @@ shinyServer(
         )
       }else if(n_m_cov() == 0 & n_l_cov() == 2){
         tagList(
-          p("E(Y|Xi\u2081, Xi2) = "),
+          p("E(Y|Xi\u2081, Xi\u2082) = "),
           br(),
           # baseline function g0 (regression in group X=0)
           fluidRow(column(2, p("\u03B3_000")),
@@ -205,7 +205,7 @@ shinyServer(
                    column(1, p("+")),
                    column(2, p("\u03B3_101*Xi\u2081")),
                    column(1, p("+")),
-                   column(2, p("\u03B3_102*Xi2")),
+                   column(2, p("\u03B3_102*Xi\u2082")),
                    column(1, p(")*X"))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="gamma100", label=NULL, value=0.2, width='100%')),
