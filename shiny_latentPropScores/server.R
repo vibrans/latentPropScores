@@ -32,7 +32,8 @@ shinyServer(
     output$regression <- renderUI({
       if(n_m_cov() == 1 & n_l_cov() == 1){
         tagList(
-          p("E(Y|Z\u2081, Xi\u2081) = "),
+          h5("Regression E(Y|Z\u2081, Xi\u2081)"),
+          p("Y ="),
           br(),
           # baseline function g0 (regression in group X=0)
           fluidRow(column(2, p("\u03B3_000")),
@@ -65,8 +66,8 @@ shinyServer(
           br(),
           # residual
           fluidRow(column(1, p("+ (")),
-                   column(2, p("mean(\u03B6), ")),
-                   column(2, p(", sd(\u03B6)")),
+                   column(2, p("Mean(\u03B6), ")),
+                   column(2, p("SD(\u03B6)")),
                    column(1, p(")"))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
@@ -74,7 +75,8 @@ shinyServer(
         )
       }else if(n_m_cov() == 1 & n_l_cov() == 2){
         tagList(
-          p("E(Y|Z\u2081, Xi\u2081, Xi\u2082) = "),
+          h5("Regression E(Y|Z\u2081, Xi\u2081, Xi\u2082)"),
+          p("Y ="),
           br(),
           # baseline function g0 (regression in group X=0)
           fluidRow(column(2, p("\u03B3_000")),
@@ -122,7 +124,8 @@ shinyServer(
         )
       }else if(n_m_cov() == 2 & n_l_cov() == 2){
         tagList(
-          p("E(Y|Z\u2081, Z\u2082, Xi\u2081, Xi\u2082) = "),
+          h5("Regression E(Y|Z\u2081, Z\u2082, Xi\u2081, Xi\u2082)"),
+          p("Y ="),
           br(),
           # baseline function g0 (regression in group X=0)
           fluidRow(column(2, p("\u03B3_000")),
@@ -175,8 +178,8 @@ shinyServer(
           br(),
           # residual
           fluidRow(column(1, p("+ (")),
-                   column(2, p("mean(\u03B6), ")),
-                   column(2, p(", sd(\u03B6)")),
+                   column(2, p("Mean(\u03B6), ")),
+                   column(2, p(", SD(\u03B6)")),
                    column(1, p(")"))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
@@ -184,7 +187,8 @@ shinyServer(
         )
       }else if(n_m_cov() == 0 & n_l_cov() == 2){
         tagList(
-          p("E(Y|Xi\u2081, Xi\u2082) = "),
+          h5("Regression E(Y|Xi\u2081, Xi\u2082)"),
+          p("Y ="),
           br(),
           # baseline function g0 (regression in group X=0)
           fluidRow(column(2, p("\u03B3_000")),
@@ -217,8 +221,8 @@ shinyServer(
           br(),
           # residual
           fluidRow(column(1, p("+ (")),
-                   column(2, p("mean(\u03B6), ")),
-                   column(2, p(", sd(\u03B6)")),
+                   column(2, p("Mean(\u03B6), ")),
+                   column(2, p(", SD(\u03B6)")),
                    column(1, p(")"))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
