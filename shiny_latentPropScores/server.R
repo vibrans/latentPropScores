@@ -233,19 +233,19 @@ shinyServer(
     
     ####### update default values depending on user's choice of preconfiguration
     ## update covariances
-    observe({
+    observeEvent(input$conf, {
       c <- input$conf
       if(c=="axel"){
         ######## manifest covariate
         # set number of manifest covariate to 1
-        updateNumericInput(session, inputId="n_m_cov", value=1)
+        isolate(updateNumericInput(session, inputId="n_m_cov", value=1))
         # adapt mean and sd of manifest covariate
         updateNumericInput(session, inputId="mean_m_cov1", value=0)
         updateNumericInput(session, inputId="sd_m_cov1", value=1)
 
         ####### latent covariate
         # set number of latent covariate to 1
-        updateNumericInput(session, inputId="n_l_cov", value=1)
+        isolate(updateNumericInput(session, inputId="n_l_cov", value=1))
         # adapt mean and sd of latent covariate
         updateNumericInput(session, inputId="mean_xi1", value=0)
         updateNumericInput(session, inputId="sd_xi1", value=1)
@@ -261,14 +261,13 @@ shinyServer(
         updateNumericInput(session, inputId="cov_z1_xi1", value=0)
         
         ######## regression
-        # BE AWARE: coefficients of manifest variables first and then of latent covariates
-        # adapt coefficients for effect function
-        lapply(0:4, function(i, l=c(0.5, 0, 0, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
-                                                                         value=l[i+1]))
-
-        # adapt coefficients of regression
-        lapply(0:4, function(i, l=c(0.4, 0.6, 0.7, 0, 0)) updateNumericInput(session, inputId=paste0("gamma00", i),
-                                                                             value=l[i+1]))
+        # BE AWARE: coefficients of manifest covariates first and then of latent covariates
+        # adapt coefficients of baseline function g0
+        lapply(0:2, function(i, l=c(0.4, 0.6, 0.7)) updateNumericInput(session, inputId=paste0("gamma00", i),
+                                                                       value=l[i+1]))
+        # adapt coefficients for effect function g1
+        lapply(0:2, function(i, l=c(0.15, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
+                                                                    value=l[i+1]))
 
         updateNumericInput(session, inputId="mean_ceta", value=0)
         updateNumericInput(session, inputId="sd_ceta", value=0.7)
@@ -302,14 +301,15 @@ shinyServer(
         # set covariance to 0.5
         updateNumericInput(session, inputId="cov_xi1_xi2", value=0.5)
         ######## regression
-        # BE AWARE: coefficients of manifest variables first and then of latent covariates
-        # adapt coefficients for effect function
-        lapply(0:4, function(i, l=c(0.15, 0, 0, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
-                                                                          value=l[i+1]))
+        # BE AWARE: coefficients of manifest covariates first and then of latent covariates
+        # adapt coefficients for effect function g1
+        lapply(0:4, function(i, l=c(0.5, 0, 0, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
+                                                                         value=l[i+1]))
+        
+        # adapt coefficients of baseline function g0
+        lapply(0:4, function(i, l=c(0.4, 0.6, 0.7, 0, 0)) updateNumericInput(session, inputId=paste0("gamma00", i),
+                                                                             value=l[i+1]))
 
-        # adapt coefficients of regression
-        lapply(0:4, function(i, l=c(0, 0.5, 0.7, 0, 0)) updateNumericInput(session, inputId=paste0("gamma00", i),
-                                                                           value=l[i+1]))
         updateNumericInput(session, inputId="mean_ceta", value=0)
         updateNumericInput(session, inputId="sd_ceta", value=0.3)
 

@@ -12,9 +12,10 @@ shinyUI(fluidPage(
       br(),
       ############# preconfiguration #############
       radioButtons(inputId="conf", label="Wähle Voreinstellungen", 
-                   choices=c("Axel (eine latente, eine manifeste Kovariate, manifeste AV, keine Interaktion)"="axel", 
-                             "Raykov (zwei latente Kovariaten, die kovariieren, manifeste AV, keine Interaktion)"="raykov", 
-                             "Standard (keine Vorgaben)"="standard")),
+                   choices=c("Standard (keine Vorgaben)"="standard",
+                             "Axel (eine latente, eine manifeste Kovariate, manifeste AV, keine Interaktion)"="axel", 
+                             "Raykov (zwei latente Kovariaten, die kovariieren, manifeste AV, keine Interaktion)"="raykov"
+                             )),
       
       ## number of repetitions of simulations ##
       radioButtons(inputId="n_rep", label="Wähle Anzahl der Simulationen", 
