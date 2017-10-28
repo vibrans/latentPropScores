@@ -92,8 +92,8 @@ shinyServer(
           br(),
           # residual
           fluidRow(column(1, p("+ (")),
-                   column(2, p("mean(\u03B6), ")),
-                   column(2, p(", sd(\u03B6)")),
+                   column(2, p("Mean(\u03B6), ")),
+                   column(2, p(", SD(\u03B6)")),
                    column(1, p(")"))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
@@ -204,8 +204,8 @@ shinyServer(
           br(),
           # residual
           fluidRow(column(1, p("+ (")),
-                   column(2, p("mean(\u03B6), ")),
-                   column(2, p(", sd(\u03B6)")),
+                   column(2, p("Mean(\u03B6), ")),
+                   column(2, p(", SD(\u03B6)")),
                    column(1, p(")"))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
@@ -430,133 +430,6 @@ shinyServer(
        }
      })
     
-
-    
-
-    
-
-    ####### update default values depending on user's choice of preconfiguration
-    ## update covariances
-    # observeEvent(input$conf, {
-    #   c <- input$conf
-    #   if(c=="axel"){
-    #     ######## manifest covariate
-    #     # set number of manifest covariate to 1
-    #     isolate(updateNumericInput(session, inputId="n_m_cov", value=1))
-    #     # adapt mean and sd of manifest covariate
-    #     updateNumericInput(session, inputId="mean_m_cov1", value=0)
-    #     updateNumericInput(session, inputId="sd_m_cov1", value=1)
-    # 
-    #     ####### latent covariate
-    #     # set number of latent covariate to 1
-    #     isolate(updateNumericInput(session, inputId="n_l_cov", value=1))
-    #     # adapt mean and sd of latent covariate
-    #     updateNumericInput(session, inputId="mean_xi1", value=0)
-    #     updateNumericInput(session, inputId="sd_xi1", value=1)
-    #     # adapt intercepts of indicator 1 to 3 of only latent covariate
-    #     lapply(1:3, function(i, l=c(0, 0.5, 0.3)) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
-    #                                                               value=l[i]))
-    #     # adapt loadings of indicator 1 to 3 of only latent covariate
-    #     lapply(1:3, function(i, l=c(1, 0.9, 0.8)) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
-    #                                                               value=l[i]))
-    #     # adapt indicators' SDs of only latent covariate
-    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "11"), value=0.3))
-    #     # set covariance to 0
-    #     updateNumericInput(session, inputId="cov_z1_xi1", value=0)
-    # 
-    #     ######## regression
-    #     # BE AWARE: coefficients of manifest covariates first and then of latent covariates
-    #     # adapt coefficients of baseline function g0
-    #     lapply(0:2, function(i, l=c(0.4, 0.6, 0.7)) updateNumericInput(session, inputId=paste0("gamma00", i),
-    #                                                                    value=l[i+1]))
-    #     # adapt coefficients for effect function g1
-    #     lapply(0:2, function(i, l=c(0.15, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
-    #                                                                 value=l[i+1]))
-    # 
-    #     updateNumericInput(session, inputId="mean_ceta", value=0)
-    #     updateNumericInput(session, inputId="sd_ceta", value=0.7)
-    # 
-    #     # Raykov preconfig
-    #   }else if(c=="raykov"){
-    #     # set number of manifest covariates to 0
-    #     updateNumericInput(session, inputId="n_m_cov", value=0)
-    # 
-    #     # set number of latent covariates to 2
-    #     updateNumericInput(session, inputId="n_l_cov", value=2)
-    #     # adapt mean and sd of latent covariates
-    #     lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("mean_xi", i), value=0))
-    #     lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("sd_xi", i), value=0))
-    # 
-    #     # adapt intercepts of indicator 1 to 3 of both latent covariates (no intercepts)
-    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
-    #                                                value=0))
-    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "12"),
-    #                                                value=0))
-    #     # adapt loadings of indicators 1 to 3 of both latent covariates
-    #     lapply(1:3, function(i, l=c(2, 2.5, 3)) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
-    #                                                                value=l[(i)]))
-    #     lapply(1:3, function(i, l=c(2.5, 3.5, 4)) updateNumericInput(session, inputId=paste0("loading_Y", i, "12"),
-    #                                                                  value=l[(i)]))
-    #     # adapt indicators' SDs of both latent covariates
-    #     lapply(1:3, function(i, l=c(0.22, 0.25, 0.27)) updateNumericInput(session, inputId=paste0("sd_e", i, "11"),
-    #                                                                       value=l[i]))
-    #     lapply(1:3, function(i, l=c(0.2, 0.3, 0.35)) updateNumericInput(session, inputId=paste0("sd_e", i, "12"),
-    #                                                                     value=l[i]))
-    #     # set covariance to 0.5
-    #     updateNumericInput(session, inputId="cov_xi1_xi2", value=0.5)
-    #     ######## regression
-    #     # BE AWARE: coefficients of manifest covariates first and then of latent covariates
-    #     # adapt coefficients for effect function g1
-    #     lapply(0:4, function(i, l=c(0.5, 0, 0, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
-    #                                                                      value=l[i+1]))
-    # 
-    #     # adapt coefficients of baseline function g0
-    #     lapply(0:4, function(i, l=c(0.4, 0.6, 0.7, 0, 0)) updateNumericInput(session, inputId=paste0("gamma00", i),
-    #                                                                          value=l[i+1]))
-    # 
-    #     updateNumericInput(session, inputId="mean_ceta", value=0)
-    #     updateNumericInput(session, inputId="sd_ceta", value=0.3)
-    # 
-    #   }else if(c=="standard"){
-    #     # set everything back
-    #     updateNumericInput(session, inputId="n_m_cov", value=0)
-    # 
-    #     # set number of latent covariates to 2
-    #     updateNumericInput(session, inputId="n_l_cov", value=1)
-    #     # adapt mean and sd of latent covariates
-    #     lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("mean_xi", i), value=0))
-    #     lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("sd_xi", i), value=0))
-    # 
-    #     # adapt intercepts of indicator 1 to 3 of both latent covariates (no intercepts)
-    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
-    #                                                value=0))
-    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "12"),
-    #                                                value=0))
-    #     # adapt loadings of indicators 1 to 3 of both latent covariates
-    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
-    #                                                                value=1))
-    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("loading_Y", i, "12"),
-    #                                                                  value=1))
-    #     # adapt indicators' SDs of both latent covariates
-    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "11"),
-    #                                                                       value=1))
-    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "12"),
-    #                                                                     value=1))
-    #     # set covariance to 0
-    #     updateNumericInput(session, inputId="cov_xi1_xi2", value=0)
-    #     ######## regression
-    #     # BE AWARE: coefficients of manifest variables first and then of latent covariates
-    #     # adapt coefficients for effect function
-    #     lapply(0:4, function(i, l=c(0.15, 0, 0, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
-    #                                                                       value=l[i+1]))
-    # 
-    #     # adapt coefficients of regression
-    #     lapply(0:4, function(i, l=c(0, 0.5, 0.7, 0, 0)) updateNumericInput(session, inputId=paste0("gamma00", i),
-    #                                                                        value=l[i+1]))
-    #     updateNumericInput(session, inputId="mean_ceta", value=0)
-    #     updateNumericInput(session, inputId="sd_ceta", value=0.3)
-    #   }
-    # })
 ##############################################################################################################
     # data generation
     
