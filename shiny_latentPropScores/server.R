@@ -4,31 +4,8 @@ shinyServer(
     n_m_cov <- reactive(input$n_m_cov)
     n_l_cov <- reactive(input$n_l_cov)
     
-    ## specify covariances
-    output$cov <- renderUI({
-      if(n_m_cov()==1 & n_l_cov()==1){
-        numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)
-      }else if(n_m_cov()==1 & n_l_cov()==2){
-        fluidRow(column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)),
-                 column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi\u2082)", value=0)),
-                 column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0)))
-      }else if(n_m_cov()==2 & n_l_cov()==2){
-        tagList(
-          fluidRow(column(4, numericInput(inputId="cov_z1_z2", label="Cov(Z\u2081, Z\u2082)", value=0)),
-                   column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)),
-                   column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi\u2082)", value=0))),
-          fluidRow(column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0)),
-                   column(4, numericInput(inputId="cov_z2_xi1", label="Cov(Z\u2082, Xi\u2081)", value=0)),
-                   column(4, numericInput(inputId="cov_z2_xi2", label="Cov(Z\u2082, Xi\u2082)", value=0))
-                   )
-        )
-      }else if(n_m_cov()==0 & n_l_cov()==2){
-        numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0)
-      }
-    })
     
-
-    
+    ## layout of regression for UI
     output$regression <- renderUI({
       if(n_m_cov() == 1 & n_l_cov() == 1){
         tagList(
@@ -41,11 +18,11 @@ shinyServer(
                    column(2, p("\u03B3\u2080\u2080\u2081*Z\u2081")),
                    column(1, p("+")),
                    column(2, p("\u03B3\u2080\u2080\u2082*Xi\u2081"))),
-          fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=0.2, width='100%')),
+          fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=v$v_gamma000, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma001", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma001", label=NULL, value=v$v_gamma001, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma002", label=NULL, value=0, width='100%'))),
+                   column(2, numericInput(inputId="gamma002", label=NULL, value=v$v_gamma002, width='100%'))),
           tags$hr(style="border-color: purple;"),
           br(),
           # effect function g1 (difference to group X=0)
@@ -57,11 +34,11 @@ shinyServer(
                    column(2, p("\u03B3\u2081\u2080\u2082*Xi\u2081")),
                    column(1, p(")*X"))),
           fluidRow(column(1),
-                   column(2, numericInput(inputId="gamma100", label=NULL, value=0.2, width='100%')),
+                   column(2, numericInput(inputId="gamma100", label=NULL, value=v$v_gamma100, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma101", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma101", label=NULL, value=v$v_gamma101, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma102", label=NULL, value=0, width='100%'))),
+                   column(2, numericInput(inputId="gamma102", label=NULL, value=v$v_gamma102, width='100%'))),
           tags$hr(style="border-color: purple;"),
           br(),
           # residual
@@ -71,7 +48,7 @@ shinyServer(
                    column(1, p(")"))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
-                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=0.35, width='100%')))
+                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
         )
       }else if(n_m_cov() == 1 & n_l_cov() == 2){
         tagList(
@@ -86,13 +63,13 @@ shinyServer(
                    column(2, p("\u03B3_\u2080\u2080\u2082*Xi\u2081")),
                    column(1, p("+")),
                    column(2, p("\u03B3\u2080\u2080\u2083*Xi\u2082"))),
-          fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=0.2, width='100%')),
+          fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=v$v_gamma000, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma001", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma001", label=NULL, value=v$v_gamma001, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma002", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma002", label=NULL, value=v$v_gamma002, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma103", label=NULL, value=0, width='100%'))),
+                   column(2, numericInput(inputId="gamma003", label=NULL, value=v$v_gamma003, width='100%'))),
           tags$hr(style="border-color: purple;"),
           br(),
           # effect function g1 (difference to group X=0)
@@ -102,15 +79,15 @@ shinyServer(
                    column(1, p("+")),
                    column(2, p("\u03B3\u2081\u2080\u2082*Xi\u2081")),
                    column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2083*Xi2")),
+                   column(2, p("\u03B3\u2081\u2080\u2083*Xi\u2082")),
                    column(1, p(")*X"))),
-          fluidRow(column(2, numericInput(inputId="gamma100", label=NULL, value=0.2, width='100%')),
+          fluidRow(column(2, numericInput(inputId="gamma100", label=NULL, value=v$v_gamma100, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma101", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma101", label=NULL, value=v$v_gamma101, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma102", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma102", label=NULL, value=v$v_gamma102, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma103", label=NULL, value=0, width='100%'))),
+                   column(2, numericInput(inputId="gamma103", label=NULL, value=v$v_gamma103, width='100%'))),
           tags$hr(style="border-color: purple;"),
           br(),
           # residual
@@ -120,7 +97,7 @@ shinyServer(
                    column(1, p(")"))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
-                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=0.35, width='100%')))
+                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
         )
       }else if(n_m_cov() == 2 & n_l_cov() == 2){
         tagList(
@@ -133,11 +110,11 @@ shinyServer(
                    column(2, p("\u03B3\u2080\u2080\u2081*Z\u2081")),
                    column(1, p("+")),
                    column(2, p("\u03B3\u2080\u2080\u2082*Z\u2081"))),
-          fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=0.2, width='100%')),
+          fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=v$v_gamma000, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma001", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma001", label=NULL, value=v$v_gamma001, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma002", label=NULL, value=0, width='100%'))),
+                   column(2, numericInput(inputId="gamma002", label=NULL, value=v$v_gamma002, width='100%'))),
           # second part of baseline function in next row because of layout problems
           fluidRow(column(3),
                    column(1, p("+")),
@@ -145,9 +122,9 @@ shinyServer(
                    column(1, p("+")),
                    column(2, p("\u03B3\u2080\u2080\u2084*Xi\u2082"))),
           fluidRow(column(4),
-                   column(2, numericInput(inputId="gamma103", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma003", label=NULL, value=v$v_gamma003, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma104", label=NULL, value=0, width='100%'))),
+                   column(2, numericInput(inputId="gamma004", label=NULL, value=v$v_gamma004, width='100%'))),
           tags$hr(style="border-color: purple;"),
           br(),
           # effect function g1 (difference to group X=0)
@@ -158,11 +135,11 @@ shinyServer(
                    column(1, p("+")),
                    column(2, p("\u03B3\u2081\u2080\u2082*Z\u2081"))),
           fluidRow(column(1),
-                   column(2, numericInput(inputId="gamma100", label=NULL, value=0.2, width='100%')),
+                   column(2, numericInput(inputId="gamma100", label=NULL, value=v$v_gamma100, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma101", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma101", label=NULL, value=v$v_gamma101, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma102", label=NULL, value=0, width='100%'))),
+                   column(2, numericInput(inputId="gamma102", label=NULL, value=v$v_gamma102, width='100%'))),
           # part two of effect function because of layout problems
           fluidRow(column(4),
                    column(1, p("+")),
@@ -171,9 +148,9 @@ shinyServer(
                    column(2, p("\u03B3\u2081\u2080\u2084*Xi2")),
                    column(1, p(")*X"))),
           fluidRow(column(5),
-                   column(2, numericInput(inputId="gamma103", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma103", label=NULL, value=v$v_gamma103, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma104", label=NULL, value=0, width='100%'))),
+                   column(2, numericInput(inputId="gamma104", label=NULL, value=v$v_gamma104, width='100%'))),
           tags$hr(style="border-color: purple;"),
           br(),
           # residual
@@ -183,7 +160,56 @@ shinyServer(
                    column(1, p(")"))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
-                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=0.35, width='100%')))
+                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
+        )
+      }else if(n_m_cov() == 2 & n_l_cov() == 1){
+        tagList(
+          h5("Regression E(Y|Z\u2081, Z\u2082, Xi\u2081)"),
+          p("Y ="),
+          br(),
+          # baseline function g0 (regression in group X=0)
+          fluidRow(column(2, p("\u03B3\u2080\u2080\u2080")),
+                   column(1, p("+")),
+                   column(2, p("\u03B3\u2080\u2080\u2081*Z\u2081")),
+                   column(1, p("+")),
+                   column(2, p("\u03B3_\u2080\u2080\u2082*Z\u2082")),
+                   column(1, p("+")),
+                   column(2, p("\u03B3\u2080\u2080\u2083*Xi\u2081"))),
+          fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=v$v_gamma000, width='100%')),
+                   column(1),
+                   column(2, numericInput(inputId="gamma001", label=NULL, value=v$v_gamma001, width='100%')),
+                   column(1),
+                   column(2, numericInput(inputId="gamma002", label=NULL, value=v$v_gamma002, width='100%')),
+                   column(1),
+                   column(2, numericInput(inputId="gamma003", label=NULL, value=v$v_gamma003, width='100%'))),
+          tags$hr(style="border-color: purple;"),
+          br(),
+          # effect function g1 (difference to group X=0)
+          fluidRow(column(2, p("+ (\u03B3\u2081\u2080\u2080")),
+                   column(1, p("+")),
+                   column(2, p("\u03B3\u2081\u2080\u2081*Z\u2081")),
+                   column(1, p("+")),
+                   column(2, p("\u03B3\u2081\u2080\u2082*Z\u2082")),
+                   column(1, p("+")),
+                   column(2, p("\u03B3\u2081\u2080\u2083*Xi\u2081")),
+                   column(1, p(")*X"))),
+          fluidRow(column(2, numericInput(inputId="gamma100", label=NULL, value=v$v_gamma100, width='100%')),
+                   column(1),
+                   column(2, numericInput(inputId="gamma101", label=NULL, value=v$v_gamma101, width='100%')),
+                   column(1),
+                   column(2, numericInput(inputId="gamma102", label=NULL, value=v$v_gamma102, width='100%')),
+                   column(1),
+                   column(2, numericInput(inputId="gamma103", label=NULL, value=v$v_gamma103, width='100%'))),
+          tags$hr(style="border-color: purple;"),
+          br(),
+          # residual
+          fluidRow(column(1, p("+ (")),
+                   column(2, p("mean(\u03B6), ")),
+                   column(2, p(", sd(\u03B6)")),
+                   column(1, p(")"))),
+          fluidRow(column(1),
+                   column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
         )
       }else if(n_m_cov() == 0 & n_l_cov() == 2){
         tagList(
@@ -196,11 +222,11 @@ shinyServer(
                    column(2, p("\u03B3\u2080\u2080\u2081*Xi\u2081")),
                    column(1, p("+")),
                    column(2, p("\u03B3\u2080\u2080\u2082*Xi2"))),
-          fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=0.2, width='100%')),
+          fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=v$v_gamma000, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma001", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma001", label=NULL, value=v$v_gamma001, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma002", label=NULL, value=0, width='100%'))),
+                   column(2, numericInput(inputId="gamma002", label=NULL, value=v$v_gamma002, width='100%'))),
           tags$hr(style="border-color: purple;"),
           br(),
           # effect function g1 (difference to group X=0)
@@ -212,11 +238,11 @@ shinyServer(
                    column(2, p("\u03B3\u2081\u2080\u2082*Xi\u2082")),
                    column(1, p(")*X"))),
           fluidRow(column(1),
-                   column(2, numericInput(inputId="gamma100", label=NULL, value=0.2, width='100%')),
+                   column(2, numericInput(inputId="gamma100", label=NULL, value=v$v_gamma100, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma101", label=NULL, value=0, width='100%')),
+                   column(2, numericInput(inputId="gamma101", label=NULL, value=v$v_gamma101, width='100%')),
                    column(1),
-                   column(2, numericInput(inputId="gamma102", label=NULL, value=0, width='100%'))),
+                   column(2, numericInput(inputId="gamma102", label=NULL, value=v$v_gamma102, width='100%'))),
           tags$hr(style="border-color: purple;"),
           br(),
           # residual
@@ -226,133 +252,311 @@ shinyServer(
                    column(1, p(")"))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
-                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=0.35, width='100%')))
+                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
         )
       }
     })
     
-    ####### update default values depending on user's choice of preconfiguration
-    ## update covariances
-    observeEvent(input$conf, {
-      c <- input$conf
-      if(c=="axel"){
-        ######## manifest covariate
-        # set number of manifest covariate to 1
-        isolate(updateNumericInput(session, inputId="n_m_cov", value=1))
-        # adapt mean and sd of manifest covariate
-        updateNumericInput(session, inputId="mean_m_cov1", value=0)
-        updateNumericInput(session, inputId="sd_m_cov1", value=1)
-
-        ####### latent covariate
-        # set number of latent covariate to 1
-        isolate(updateNumericInput(session, inputId="n_l_cov", value=1))
-        # adapt mean and sd of latent covariate
-        updateNumericInput(session, inputId="mean_xi1", value=0)
-        updateNumericInput(session, inputId="sd_xi1", value=1)
-        # adapt intercepts of indicator 1 to 3 of only latent covariate
-        lapply(1:3, function(i, l=c(0, 0.5, 0.3)) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
-                                                                  value=l[i]))
-        # adapt loadings of indicator 1 to 3 of only latent covariate
-        lapply(1:3, function(i, l=c(1, 0.9, 0.8)) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
-                                                                  value=l[i]))
-        # adapt indicators' SDs of only latent covariate
-        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "11"), value=0.3))
-        # set covariance to 0
-        updateNumericInput(session, inputId="cov_z1_xi1", value=0)
-        
-        ######## regression
-        # BE AWARE: coefficients of manifest covariates first and then of latent covariates
-        # adapt coefficients of baseline function g0
-        lapply(0:2, function(i, l=c(0.4, 0.6, 0.7)) updateNumericInput(session, inputId=paste0("gamma00", i),
-                                                                       value=l[i+1]))
-        # adapt coefficients for effect function g1
-        lapply(0:2, function(i, l=c(0.15, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
-                                                                    value=l[i+1]))
-
-        updateNumericInput(session, inputId="mean_ceta", value=0)
-        updateNumericInput(session, inputId="sd_ceta", value=0.7)
-        
-        # Raykov preconfig
-      }else if(c=="raykov"){
-        # set number of manifest covariates to 0
-        updateNumericInput(session, inputId="n_m_cov", value=0)
-        
-        # set number of latent covariates to 2
-        updateNumericInput(session, inputId="n_l_cov", value=2)
-        # adapt mean and sd of latent covariates
-        lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("mean_xi", i), value=0))
-        lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("sd_xi", i), value=0))
-        
-        # adapt intercepts of indicator 1 to 3 of both latent covariates (no intercepts)
-        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
-                                                   value=0))
-        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "12"),
-                                                   value=0))
-        # adapt loadings of indicators 1 to 3 of both latent covariates
-        lapply(1:3, function(i, l=c(2, 2.5, 3)) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
-                                                                   value=l[(i)]))
-        lapply(1:3, function(i, l=c(2.5, 3.5, 4)) updateNumericInput(session, inputId=paste0("loading_Y", i, "12"),
-                                                                     value=l[(i)]))
-        # adapt indicators' SDs of both latent covariates
-        lapply(1:3, function(i, l=c(0.22, 0.25, 0.27)) updateNumericInput(session, inputId=paste0("sd_e", i, "11"),
-                                                                          value=l[i]))
-        lapply(1:3, function(i, l=c(0.2, 0.3, 0.35)) updateNumericInput(session, inputId=paste0("sd_e", i, "12"),
-                                                                        value=l[i]))
-        # set covariance to 0.5
-        updateNumericInput(session, inputId="cov_xi1_xi2", value=0.5)
-        ######## regression
-        # BE AWARE: coefficients of manifest covariates first and then of latent covariates
-        # adapt coefficients for effect function g1
-        lapply(0:4, function(i, l=c(0.5, 0, 0, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
-                                                                         value=l[i+1]))
-        
-        # adapt coefficients of baseline function g0
-        lapply(0:4, function(i, l=c(0.4, 0.6, 0.7, 0, 0)) updateNumericInput(session, inputId=paste0("gamma00", i),
-                                                                             value=l[i+1]))
-
-        updateNumericInput(session, inputId="mean_ceta", value=0)
-        updateNumericInput(session, inputId="sd_ceta", value=0.3)
-
-      }else if(c=="standard"){
-        # set everything back
-        updateNumericInput(session, inputId="n_m_cov", value=0)
-        
-        # set number of latent covariates to 2
-        updateNumericInput(session, inputId="n_l_cov", value=1)
-        # adapt mean and sd of latent covariates
-        lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("mean_xi", i), value=0))
-        lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("sd_xi", i), value=0))
-        
-        # adapt intercepts of indicator 1 to 3 of both latent covariates (no intercepts)
-        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
-                                                   value=0))
-        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "12"),
-                                                   value=0))
-        # adapt loadings of indicators 1 to 3 of both latent covariates
-        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
-                                                                   value=1))
-        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("loading_Y", i, "12"),
-                                                                     value=1))
-        # adapt indicators' SDs of both latent covariates
-        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "11"),
-                                                                          value=1))
-        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "12"),
-                                                                        value=1))
-        # set covariance to 0
-        updateNumericInput(session, inputId="cov_xi1_xi2", value=0)
-        ######## regression
-        # BE AWARE: coefficients of manifest variables first and then of latent covariates
-        # adapt coefficients for effect function
-        lapply(0:4, function(i, l=c(0.15, 0, 0, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
-                                                                          value=l[i+1]))
-        
-        # adapt coefficients of regression
-        lapply(0:4, function(i, l=c(0, 0.5, 0.7, 0, 0)) updateNumericInput(session, inputId=paste0("gamma00", i),
-                                                                           value=l[i+1]))
-        updateNumericInput(session, inputId="mean_ceta", value=0)
-        updateNumericInput(session, inputId="sd_ceta", value=0.3)
+    ## specify covariances
+    output$cov <- renderUI({
+      if(n_m_cov()==1 & n_l_cov()==1){
+        numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=v$v_cov_z1_xi1)
+      }else if(n_m_cov()==1 & n_l_cov()==2){
+        fluidRow(column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)),
+                 column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi\u2082)", value=0)),
+                 column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0)))
+      }else if(n_m_cov()==2 & n_l_cov()==2){
+        tagList(
+          fluidRow(column(4, numericInput(inputId="cov_z1_z2", label="Cov(Z\u2081, Z\u2082)", value=0)),
+                   column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)),
+                   column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi\u2082)", value=0))),
+          fluidRow(column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0)),
+                   column(4, numericInput(inputId="cov_z2_xi1", label="Cov(Z\u2082, Xi\u2081)", value=0)),
+                   column(4, numericInput(inputId="cov_z2_xi2", label="Cov(Z\u2082, Xi\u2082)", value=0))
+          )
+        )
+      }else if(n_m_cov()==2 & n_l_cov()==1){
+        tagList(
+          fluidRow(column(4, numericInput(inputId="cov_z1_z2", label="Cov(Z\u2081, Z\u2082)", value=0)),
+                   column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)),
+                   column(4, numericInput(inputId="cov_z2_xi1", label="Cov(Z\u2082, Xi\u2081)", value=0)))
+        )
+      }else if(n_m_cov()==0 & n_l_cov()==2){
+        numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=v$v_cov_xi1_xi2)
       }
     })
+    
+    
+    ####################### default values depending on choice of preconfiguration ########################
+     v <- reactiveValues()
+     observeEvent(input$conf, {
+       c <- input$conf
+       if(c=="standard"){
+         ######## manifest covariate
+         #!# problem: two strategies for updating the default values: for ui layout specifications with *update
+         #!# luckily possible because no circuits are buildt
+         #!# for layout specifications on server no updating but rather differing "reactive values"
+         #!# => probably not very elegently
+
+         # set number of manifest covariate to 1
+         updateNumericInput(session, inputId="n_m_cov", value=1)
+         # adapt mean and sd of manifest covariate
+         updateNumericInput(session, inputId="mean_z1", value=0)
+         updateNumericInput(session, inputId="sd_z1", value=1)
+         ####### latent covariate
+         # set number of latent covariate to 1
+         updateNumericInput(session, inputId="n_l_cov", value=1)
+         # adapt mean and sd of latent covariate
+         updateNumericInput(session, inputId="mean_xi1", value=0)
+         updateNumericInput(session, inputId="sd_xi1", value=1)
+         # indentifier of indicator variables: Yitz
+         # i ... index of indicator
+         # t ... time point
+         # z ... index of latent covariate
+         # adapt intercepts of indicator 1 to 3 of only latent covariate
+         lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
+                                                                       value=0))
+         # adapt loadings of indicator 1 to 3 of only latent covariate
+         lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
+                                                                       value=1))
+         # adapt indicators' SDs of only latent covariate
+         lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "11"), value=0.3))
+         # set covariance to 0
+         v$v_cov_z1_xi1 <- 0
+
+         ######## regression
+         # BE AWARE: coefficients of manifest covariates first and then of latent covariates
+         # adapt coefficients of baseline function g0
+         #!# problem: lapply(0:2, function(i, l=c(0, 1, 1)) v[[paste0("v$v_gamma00", i)]] <- l[i+1])
+         #!# -> 1. get("v$v_gamma000") necessary to get value / v$v_gamma000 not working;
+         #!# assignment of vectorelement l[i] not possible (don't know why)
+         v$v_gamma000 <- 0
+         v$v_gamma001 <- 1
+         v$v_gamma002 <- 1
+         v$v_gamma003 <- 1
+         v$v_gamma004 <- 1
+         # adapt coefficients for effect function g1 (treatmenteffect 0.15; no interaction cov*X)
+         v$v_gamma100 <- 0.2
+         v$v_gamma101 <- 0
+         v$v_gamma102 <- 0
+         v$v_gamma103 <- 0
+         v$v_gamma104 <- 0
+         # adapt mean and standard deviance
+         v$v_mean_ceta <-  0
+         v$v_sd_ceta <-  0.35
+
+       }else if(c=="axel"){
+         #!# problem: redundant code
+         ######## manifest covariate
+         # set number of manifest covariate to 1
+         updateNumericInput(session, inputId="n_m_cov", value=1)
+         # adapt mean and sd of manifest covariate
+         updateNumericInput(session, inputId="mean_z1", value=0)
+         updateNumericInput(session, inputId="sd_z1", value=1)
+         ####### latent covariate
+         # set number of latent covariate to 1
+         updateNumericInput(session, inputId="n_l_cov", value=1)
+         # adapt mean and sd of latent covariate
+         updateNumericInput(session, inputId="mean_xi1", value=0)
+         updateNumericInput(session, inputId="sd_xi1", value=1)
+         # adapt intercepts of indicator 1 to 3 of only latent covariate
+         lapply(1:3, function(i, l=c(0, 0.5, 0.3)) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
+                                                                      value=l[i]))
+         # adapt loadings of indicator 1 to 3 of only latent covariate
+         lapply(1:3, function(i, l=c(1, 0.9, 0.8)) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
+                                                                      value=l[i]))
+         # adapt indicators' SDs of only latent covariate
+         lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "11"), value=0.3))
+         # set covariance to 0
+         v$v_cov_z1_xi1 <- 0
+
+        ######## regression
+        # BE AWARE: coefficients of manifest covariates first and then of latent covariates
+        # adapt coefficients of baseline function g0
+         v$v_gamma000 <- 0
+         v$v_gamma001 <- 0.6
+         v$v_gamma002 <- 0.7
+        # adapt coefficients for effect function g1
+         v$v_gamma100 <- 0.5
+         v$v_gamma101 <- 0
+         v$v_gamma102 <- 0
+        # adapt mean and standard deviance
+         v$v_mean_ceta <- 0
+         v$v_sd_ceta <- 0.7
+
+       }else if(c=="raykov"){
+        ######## manifest covariate
+        # set number of manifest covariate to 1
+         updateNumericInput(session, inputId="n_m_cov", value=0)
+        ####### latent covariate
+        # set number of latent covariate to 2
+        updateNumericInput(session, inputId="n_l_cov", value=2)
+        # adapt mean and sd of latent covariates
+        v$v_mean_xi1 <- 0
+        v$v_sd_xi1 <- 1
+        v$v_mean_xi2 <- 0
+        v$v_sd_xi2 <- 1
+        # adapt intercepts of indicators 1 to 3 of both latent covariates (no intercepts)
+        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
+                                                       value=0))
+        lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "12"),
+                                                       value=0))
+        # adapt loadings of indicators 1 to 3 of both latent covariates
+        lapply(1:3, function(i, l=c(2, 2.5, 3)) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
+                                                                       value=l[(i)]))
+        lapply(1:3, function(i, l=c(2.5, 3.5, 4)) updateNumericInput(session, inputId=paste0("loading_Y", i, "12"),
+                                                                         value=l[(i)]))
+        # adapt indicators' SDs of both latent covariates
+        lapply(1:3, function(i, l=c(0.22, 0.25, 0.27)) updateNumericInput(session, inputId=paste0("sd_e", i, "11"),
+                                                                              value=l[i]))
+        lapply(1:3, function(i, l=c(0.2, 0.3, 0.35)) updateNumericInput(session, inputId=paste0("sd_e", i, "12"),
+                                                                            value=l[i]))
+        # set covariance to 0.5
+         v$v_cov_xi1_xi2 <- 0.5
+
+        ######## regression
+        # BE AWARE: coefficients of manifest covariates first and then of latent covariates
+        # adapt coefficients of baseline function g0
+         v$v_gamma000 <- 0
+         v$v_gamma001 <- 0.5
+         v$v_gamma002 <- 0.7
+        # adapt coefficients for effect function g1
+         v$v_gamma100 <- 0.15
+         v$v_gamma101 <- 0
+         v$v_gamma102 <- 0
+        # adapt mean and standard deviance
+        v$v_mean_ceta <- 0
+        v$v_sd_ceta <- 0.3
+       }
+     })
+    
+
+    
+
+    
+
+    ####### update default values depending on user's choice of preconfiguration
+    ## update covariances
+    # observeEvent(input$conf, {
+    #   c <- input$conf
+    #   if(c=="axel"){
+    #     ######## manifest covariate
+    #     # set number of manifest covariate to 1
+    #     isolate(updateNumericInput(session, inputId="n_m_cov", value=1))
+    #     # adapt mean and sd of manifest covariate
+    #     updateNumericInput(session, inputId="mean_m_cov1", value=0)
+    #     updateNumericInput(session, inputId="sd_m_cov1", value=1)
+    # 
+    #     ####### latent covariate
+    #     # set number of latent covariate to 1
+    #     isolate(updateNumericInput(session, inputId="n_l_cov", value=1))
+    #     # adapt mean and sd of latent covariate
+    #     updateNumericInput(session, inputId="mean_xi1", value=0)
+    #     updateNumericInput(session, inputId="sd_xi1", value=1)
+    #     # adapt intercepts of indicator 1 to 3 of only latent covariate
+    #     lapply(1:3, function(i, l=c(0, 0.5, 0.3)) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
+    #                                                               value=l[i]))
+    #     # adapt loadings of indicator 1 to 3 of only latent covariate
+    #     lapply(1:3, function(i, l=c(1, 0.9, 0.8)) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
+    #                                                               value=l[i]))
+    #     # adapt indicators' SDs of only latent covariate
+    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "11"), value=0.3))
+    #     # set covariance to 0
+    #     updateNumericInput(session, inputId="cov_z1_xi1", value=0)
+    # 
+    #     ######## regression
+    #     # BE AWARE: coefficients of manifest covariates first and then of latent covariates
+    #     # adapt coefficients of baseline function g0
+    #     lapply(0:2, function(i, l=c(0.4, 0.6, 0.7)) updateNumericInput(session, inputId=paste0("gamma00", i),
+    #                                                                    value=l[i+1]))
+    #     # adapt coefficients for effect function g1
+    #     lapply(0:2, function(i, l=c(0.15, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
+    #                                                                 value=l[i+1]))
+    # 
+    #     updateNumericInput(session, inputId="mean_ceta", value=0)
+    #     updateNumericInput(session, inputId="sd_ceta", value=0.7)
+    # 
+    #     # Raykov preconfig
+    #   }else if(c=="raykov"){
+    #     # set number of manifest covariates to 0
+    #     updateNumericInput(session, inputId="n_m_cov", value=0)
+    # 
+    #     # set number of latent covariates to 2
+    #     updateNumericInput(session, inputId="n_l_cov", value=2)
+    #     # adapt mean and sd of latent covariates
+    #     lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("mean_xi", i), value=0))
+    #     lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("sd_xi", i), value=0))
+    # 
+    #     # adapt intercepts of indicator 1 to 3 of both latent covariates (no intercepts)
+    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
+    #                                                value=0))
+    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "12"),
+    #                                                value=0))
+    #     # adapt loadings of indicators 1 to 3 of both latent covariates
+    #     lapply(1:3, function(i, l=c(2, 2.5, 3)) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
+    #                                                                value=l[(i)]))
+    #     lapply(1:3, function(i, l=c(2.5, 3.5, 4)) updateNumericInput(session, inputId=paste0("loading_Y", i, "12"),
+    #                                                                  value=l[(i)]))
+    #     # adapt indicators' SDs of both latent covariates
+    #     lapply(1:3, function(i, l=c(0.22, 0.25, 0.27)) updateNumericInput(session, inputId=paste0("sd_e", i, "11"),
+    #                                                                       value=l[i]))
+    #     lapply(1:3, function(i, l=c(0.2, 0.3, 0.35)) updateNumericInput(session, inputId=paste0("sd_e", i, "12"),
+    #                                                                     value=l[i]))
+    #     # set covariance to 0.5
+    #     updateNumericInput(session, inputId="cov_xi1_xi2", value=0.5)
+    #     ######## regression
+    #     # BE AWARE: coefficients of manifest covariates first and then of latent covariates
+    #     # adapt coefficients for effect function g1
+    #     lapply(0:4, function(i, l=c(0.5, 0, 0, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
+    #                                                                      value=l[i+1]))
+    # 
+    #     # adapt coefficients of baseline function g0
+    #     lapply(0:4, function(i, l=c(0.4, 0.6, 0.7, 0, 0)) updateNumericInput(session, inputId=paste0("gamma00", i),
+    #                                                                          value=l[i+1]))
+    # 
+    #     updateNumericInput(session, inputId="mean_ceta", value=0)
+    #     updateNumericInput(session, inputId="sd_ceta", value=0.3)
+    # 
+    #   }else if(c=="standard"){
+    #     # set everything back
+    #     updateNumericInput(session, inputId="n_m_cov", value=0)
+    # 
+    #     # set number of latent covariates to 2
+    #     updateNumericInput(session, inputId="n_l_cov", value=1)
+    #     # adapt mean and sd of latent covariates
+    #     lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("mean_xi", i), value=0))
+    #     lapply(1:2, function(i) updateNumericInput(session, inputId=paste0("sd_xi", i), value=0))
+    # 
+    #     # adapt intercepts of indicator 1 to 3 of both latent covariates (no intercepts)
+    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "11"),
+    #                                                value=0))
+    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("intercept_Y", i, "12"),
+    #                                                value=0))
+    #     # adapt loadings of indicators 1 to 3 of both latent covariates
+    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("loading_Y", i, "11"),
+    #                                                                value=1))
+    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("loading_Y", i, "12"),
+    #                                                                  value=1))
+    #     # adapt indicators' SDs of both latent covariates
+    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "11"),
+    #                                                                       value=1))
+    #     lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "12"),
+    #                                                                     value=1))
+    #     # set covariance to 0
+    #     updateNumericInput(session, inputId="cov_xi1_xi2", value=0)
+    #     ######## regression
+    #     # BE AWARE: coefficients of manifest variables first and then of latent covariates
+    #     # adapt coefficients for effect function
+    #     lapply(0:4, function(i, l=c(0.15, 0, 0, 0, 0)) updateNumericInput(session, inputId=paste0("gamma10", i),
+    #                                                                       value=l[i+1]))
+    # 
+    #     # adapt coefficients of regression
+    #     lapply(0:4, function(i, l=c(0, 0.5, 0.7, 0, 0)) updateNumericInput(session, inputId=paste0("gamma00", i),
+    #                                                                        value=l[i+1]))
+    #     updateNumericInput(session, inputId="mean_ceta", value=0)
+    #     updateNumericInput(session, inputId="sd_ceta", value=0.3)
+    #   }
+    # })
 ##############################################################################################################
     # data generation
     

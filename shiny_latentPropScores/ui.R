@@ -37,6 +37,7 @@ shinyUI(fluidPage(
                             column(6, sliderInput(inputId="sd_xi1", label=h5(strong("SD(Xi\u2081)")),
                                                   value=1, min=0.001, max=4))
                    ),
+                   # indicators
                    h3(strong("Y\u2081\u2081\u2081 =")),
                    fluidRow(column(2, h4("\u03BD\u2081\u2081\u2081")),
                             column(1, h4("+")),
@@ -52,8 +53,7 @@ shinyUI(fluidPage(
                             column(2, numericInput(inputId="loading_Y111",
                                                    label=NULL, value=1, width='100%')),
                             column(2),
-                            column(2, numericInput(inputId="mean_e111",
-                                                   label=NULL, value=0, width='100%')),
+                            column(2, p("0", align = "center")),
                             column(2, numericInput(inputId="sd_e111",
                                                label=NULL, value=1, min=0.001, max=3, width='100%'))),
                    h3(strong("Y\u2082\u2081\u2081 =")),
@@ -71,8 +71,7 @@ shinyUI(fluidPage(
                             column(2, numericInput(inputId="loading_Y211",
                                                    label=NULL, value=1, width='100%')),
                             column(2),
-                            column(2, numericInput(inputId="mean_e211",
-                                                   label=NULL, value=0, width='100%')),
+                            column(2, p("0", align = "center")),
                             column(2, numericInput(inputId="sd_e211",
                                                label=NULL, value=1, min=0.001, max=3, width='100%'))),
                    h3(strong("Y\u2083\u2081\u2081 =")),
@@ -90,8 +89,7 @@ shinyUI(fluidPage(
                             column(2, numericInput(inputId="loading_Y311",
                                                    label=NULL, value=1, width='100%')),
                             column(2),
-                            column(2, numericInput(inputId="mean_e311",
-                                                   label=NULL, value=0, width='100%')),
+                            column(2, p("0", align = "center")),
                             column(2, numericInput(inputId="sd_e311",
                                                label=NULL, value=1, min=0.001, max=3, width='100%')))
                  ),
@@ -203,6 +201,7 @@ shinyUI(fluidPage(
     ),
     mainPanel(
       #tableOutput("t")
+      #uiOutput("ahhh")
     )
   )
 )
