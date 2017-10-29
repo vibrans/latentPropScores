@@ -1,4 +1,5 @@
 library(shiny)
+library(MASS)
 # Estimating Causal Effects by Adjusting for Propensity Scores computed from Latent Variables
 
 shinyUI(fluidPage(
@@ -197,7 +198,13 @@ shinyUI(fluidPage(
       )
     ),
     mainPanel(
-      #tableOutput("t")
+      tabsetPanel(
+        tabPanel('Raykov-Methode',
+                 tableOutput("t")),
+        tabPanel('Effect-Lite-R-Methode'),
+        tabPanel('neue latente PS-Methode')
+      )
+      
       #uiOutput("ahhh")
     )
   )

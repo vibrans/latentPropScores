@@ -434,11 +434,10 @@ shinyServer(
     # data generation
     
     N <- reactive(input$N)
-    n_m_cov <- reactive(input$n_m_cov)
-    n_l_cov <- reactive(input$n_l_cov)
 
     ### Simulation of normally distributed independent continuous variables
-    data <- reactive({
+     #!# problem: please create nicer error message for semidefiniteness
+    df <- reactive({
       if(n_m_cov()==0 & n_l_cov()==2){
       # means
       mean_xi1 <- reactive(input$mean_xi1)
@@ -449,9 +448,10 @@ shinyServer(
       # get covariances
       cov_xi1_xi2 <- reactive(input$cov_xi1_xi2)
       # create dataframe
-      mvrnorm(n=N, mu=c(mean_xi1(), mean_xi2),
-              Sigma=matrix(c(var_xi1(), cov_xi1_xi2(), cov_xi1_xi2(), var_xi2()), nrow=2), empirical=TRUE)
-      
+      setNames(data.frame(mvrnorm(n=N(), mu=c(mean_xi1(), mean_xi2()),
+              Sigma=matrix(c(var_xi1(), cov_xi1_xi2(), cov_xi1_xi2(), var_xi2()), nrow=2), empirical=TRUE)),
+              c("Xi1", "Xi2"))
+
     }else if(n_m_cov()==1 & n_l_cov()==1){
       # means
       mean_z1 <- reactive(input$mean_z1)
@@ -462,9 +462,11 @@ shinyServer(
       # get covariances
       cov_z1_xi1 <- reactive(input$cov_z1_xi1)
       # create dataframe
-      mvrnorm(n=N, mu=c(mean_z1(), mean_xi1()),
-              Sigma=matrix(c(var_z1, cov_z1_xi1(), cov_z1_xi1, var_xi1), nrow=2), empirical=TRUE)
-      
+      setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_xi1()),
+              Sigma=matrix(c(var_z1(), cov_z1_xi1(), cov_z1_xi1(), var_xi1()), nrow=2), empirical=TRUE)),
+              c("Z1", "Xi1"))
+
+
     }else if(n_m_cov()==1 & n_l_cov()==2){
       # means
       mean_z1 <- reactive(input$mean_z1)
@@ -479,11 +481,12 @@ shinyServer(
       cov_z1_xi2 <- reactive(input$cov_z1_xi2)
       cov_xi1_xi2 <- reactive(input$cov_xi1_xi2)
       # create dataframe
-      mvrnorm(n=N, mu=c(mean_z1(), mean_xi1(), mean_xi2()),
+      setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_xi1(), mean_xi2()),
               Sigma=matrix(c(var_z1(), cov_z1_xi1(), cov_z1_xi2(),
                              cov_z1_xi1(), var_xi1(), cov_xi1_xi2(),
-                             cov_z1_xi2(), cov_xi1_xi2(), var_xi2), nrow=3), empirical=TRUE)
-      
+                             cov_z1_xi2(), cov_xi1_xi2(), var_xi2()), nrow=3), empirical=TRUE)),
+              c("Z1", "Xi1", "Xi2"))
+
     }else if(n_m_cov()==2 & n_l_cov()==1){
       # means
       mean_z1 <- reactive(input$mean_z1)
@@ -498,11 +501,12 @@ shinyServer(
       cov_z1_xi1 <- reactive(input$cov_z1_xi1)
       cov_z2_xi1 <- reactive(input$cov_z2_xi1)
       # create dataframe
-      mvrnorm(n=N, mu=c(mean_z1(), mean_z2(), mean_xi1()),
+      setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_z2(), mean_xi1()),
               Sigma=matrix(c(var_z1(), cov_z1_z2(), cov_z1_xi1(),
                              cov_z1_z2(), var_z2(), cov_z2_xi1(),
-                             cov_z1_xi1(), cov_z2_xi1(), var_xi1()), nrow=3), empirical=TRUE)
-      
+                             cov_z1_xi1(), cov_z2_xi1(), var_xi1()), nrow=3), empirical=TRUE)),
+              c("Z1", "Z2", "Xi1"))
+
     }else if(n_m_cov()==2 & n_l_cov()==2){
       # means
       mean_z1 <- reactive(input$mean_z1)
@@ -517,21 +521,60 @@ shinyServer(
       # get covariances
       cov_z1_xi1 <- reactive(input$cov_z1_xi1)
       cov_z1_xi2 <- reactive(input$cov_z1_xi2)
+      cov_z1_z2 <- reactive(input$cov_z1_z2)
+      cov_z2_xi1 <- reactive(input$cov_z2_xi1)
+      cov_z2_xi2 <- reactive(input$cov_z2_xi2)
       cov_xi1_xi2 <- reactive(input$cov_xi1_xi2)
       # create dataframe
-      mvrnorm(n=N, mu=c(mean_z1(), mean_z2(), mean_xi1(), mean_xi2),
+      setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_z2(), mean_xi1(), mean_xi2()),
               Sigma=matrix(c(var_z1(), cov_z1_z2(), cov_z1_xi1(), cov_z1_xi2(),
                              cov_z1_z2(), var_z2(), cov_z2_xi1(), cov_z2_xi2(),
                              cov_z1_xi1(), cov_z2_xi1(), var_xi1(), cov_xi1_xi2(),
-                             cov_z1_xi2(), cov_z2_xi2(), cov_xi1_xi2(), var_xi2()), nrow=4), empirical=TRUE)
+                             cov_z1_xi2(), cov_z2_xi2(), cov_xi1_xi2(), var_xi2()), nrow=4), empirical=TRUE)),
+              c("Z1", "Z2", "Xi1", "Xi2"))
     }
     })
-    #Xi1 = data[, 1]  
-    #Xi2 = data[, 2]  
-    #output$table <- renderTable("t", head(data()))
+
+    ########## indicator variables for latent covariates
+      if(isolate(n_l_cov())>0){
+        Y111 <- reactive(input$loading_Y111*data()$Xi1 + rnorm(n, 0, input$sd_e111))
+        Y211 <- reactive(rnorm(n, 0, input$sd_e211))
+        Y311 <- reactive(rnorm(n, 0, input$sd_e311))
+      }
+      if(isolate(n_l_cov())>1){
+        Y112 <- reactive(rnorm(n, 0, input$sd_e112))
+        Y212 <- reactive(rnorm(n, 0, input$sd_e212))
+        Y312 <- reactive(rnorm(n, 0, input$sd_e312))
+      }
+
     
     
-    # 3. New idea: using lavaan to estimate treatment effect with latent PSs
+    
+    
+
+    
+    
+    # Messung von Xi1 durch messfehlerbehaftete Kovariaten
+    # Z11 <- 2*Xi1 + ceta11
+    # Z12 <- 2.5*Xi1 + ceta12
+    # Z13 <- 3*Xi1 + ceta13
+    # 
+    # # Messung von Xi2 durch messfehlerbehaftete Kovariaten
+    # Z21 <- 2.5*Xi2 + ceta21
+    # Z22 <- 3.5*Xi2 + ceta22
+    # Z23 <- 4*Xi2 + ceta23
+    
+
+    ############################################ Raykov's idea ###############################################
+    
+    
+    ################################# proved EffectLiteR approach ############################################
+    
+    
+    
+    ################################# new latent Propensity Score approach ###################################
+    ## using lavaan to estimate treatment effect with latent PSs
+
     
     
     
@@ -539,10 +582,9 @@ shinyServer(
     
     
     
-    
-    
-    
-    
+    output$t <- renderTable(
+      head(df())
+    )
     
     
     
