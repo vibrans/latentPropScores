@@ -1,3 +1,4 @@
+
 shinyServer(
   function(input, output, session){
     ## some input variables
@@ -13,16 +14,15 @@ shinyServer(
             helpText('$$ P(X|Z1, Xi1) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1)}
                                         {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1)}\\!$$')),
           fluidRow(column(2),
-                   column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
-                   column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
-                   column(2, numericInput(inputId="alpha2", label=withMathJax('$$\\alpha_2$$'), value=1)))
+                   column(2, numericInput(inputId="alpha0", label=div('$$\\alpha_0$$'), value=0)),
+                   column(2, numericInput(inputId="alpha1", label=div('$$\\alpha_1$$'), value=1)),
+                   column(2, numericInput(inputId="alpha2", label=div('$$\\alpha_2$$'), value=1)))
                    
         )
       }else if(n_m_cov()==1 & n_l_cov()==2){
         tagList(
-          withMathJax(
-            helpText('$$ P(X|Z1, Xi1, Xi2) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1 + \\alpha_3 \\xi_2)}
-                     {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1 + \\alpha_3 \\xi_2)}\\!$$')),
+          div('$$ P(X|Z1, Xi1, Xi2) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1 + \\alpha_3 \\xi_2)}
+                     {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1 + \\alpha_3 \\xi_2)}\\!$$'),
           fluidRow(column(2),
                    column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
                    column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
@@ -70,17 +70,17 @@ shinyServer(
     
     
     
-    
     ## layout of tabPanel regression
     output$regression <- renderUI({
       if(n_m_cov() == 1 & n_l_cov() == 1){
         tagList(
-          h5("Regression E(Y|Z\u2081, Xi\u2081)"),
+          h5('Regression E(Y|Z\u2081, Xi\u2081)'),
           p("Y ="),
           br(),
           # baseline function g0 (regression in group X=0)
-          fluidRow(column(2, p("\u03B3\u2080\u2080\u2080")),
-                   column(1, p("+")),
+          fluidRow(#column(2, p("\u03B3\u2080\u2080\u2080")),
+                   column(2, withMathJax('$$\\gamma_{000}$$')),
+                   column(1, div('$$+$$')),
                    column(2, p("\u03B3\u2080\u2080\u2081*Z\u2081")),
                    column(1, p("+")),
                    column(2, p("\u03B3\u2080\u2080\u2082*Xi\u2081"))),
