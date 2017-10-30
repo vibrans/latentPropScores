@@ -4,8 +4,29 @@ shinyServer(
     n_m_cov <- reactive(input$n_m_cov)
     n_l_cov <- reactive(input$n_l_cov)
     
-    
-    ## layout of regression for UI
+    ## layout for tabPanel conditional treatment probability
+    output$PrX <- renderUI({
+      #PX1 <- exp(0.0 + .4*Xi1 + 0.6*Xi2) / (1 + exp(0.0 + 0.4*Xi1 + 0.6*Xi2))
+      if(n_m_cov()==1 & n_l_cov()==1){
+        tagList(
+          h5("P(X|Z1, Xi1) ="),
+          
+        )
+      }else if(n_m_cov()==1 & n_l_cov()==2){
+        h5("P(X|Z1, Xi1, Xi2) ="),
+        
+      }else if(n_m_cov()==2 & n_l_cov()==2){
+        h5("P(X|Z1, Z2, Xi1, Xi2) ="),
+        
+      }else if(n_m_cov()==2 & n_l_cov()==1){
+        h5("P(X|Z1, Z2, Xi1) ="),
+        
+      }else if(n_m_cov()==0 & n_l_cov()==2){
+        h5("P(X|Xi1, Xi2) ="),
+        
+      }
+    })
+    ## layout of tabPanel regression
     output$regression <- renderUI({
       if(n_m_cov() == 1 & n_l_cov() == 1){
         tagList(
@@ -437,7 +458,7 @@ shinyServer(
 
     ### Simulation of normally distributed independent continuous variables
      #!# problem: please create nicer error message for semidefiniteness
-    df <- reactive({
+    df1 <- reactive({
       if(n_m_cov()==0 & n_l_cov()==2){
       # means
       mean_xi1 <- reactive(input$mean_xi1)
@@ -532,52 +553,29 @@ shinyServer(
                              cov_z1_xi1(), cov_z2_xi1(), var_xi1(), cov_xi1_xi2(),
                              cov_z1_xi2(), cov_z2_xi2(), cov_xi1_xi2(), var_xi2()), nrow=4), empirical=TRUE)),
               c("Z1", "Z2", "Xi1", "Xi2"))
-    }
-      # if(n_l_cov()>0){
-      #   df$Y111 <- input$loading_Y111*df$Xi1 + rnorm(N(), 0, input$sd_e111)
-      #   df$Y211 <- rnorm(N(), 0, input$sd_e211)
-      #   df$Y311 <- rnorm(N(), 0, input$sd_e311)
-      # }
-      # if(n_l_cov()>1){
-      #   df$Y112 <- rnorm(N(), 0, input$sd_e112)
-      #   df$Y212 <- rnorm(N(), 0, input$sd_e212)
-      #   df$Y312 <- rnorm(N(), 0, input$sd_e312)
-      # }
+      }
     })
 
+
     ########## indicator variables for latent covariates
-      # data <- reactive({
-      #   if(n_l_cov()>0){
-      #     df()$Y111 <- input$loading_Y111*df()$Xi1 + rnorm(n, 0, input$sd_e111)
-      #     df()$Y211 <- rnorm(n, 0, input$sd_e211)
-      #     df()$Y311 <- rnorm(n, 0, input$sd_e311)
-      #   }
-      #   if(n_l_cov()>1){
-      #     df()$Y112 <- rnorm(n, 0, input$sd_e112)
-      #     df()$Y212 <- rnorm(n, 0, input$sd_e212)
-      #     df()$Y312 <- rnorm(n, 0, input$sd_e312)
-      #   }
-      # })
-      
+      data <- reactive({
+        if(n_l_cov()>0){
+          df1a <- df1()
+          df1a$Y111 <- input$loading_Y111*df1a$Xi1 + rnorm(N(), 0, input$sd_e111)
+          df1a$Y211 <- input$loading_Y211*df1a$Xi1 + rnorm(N(), 0, input$sd_e211)
+          df1a$Y311 <- input$loading_Y311*df1a$Xi1 + rnorm(N(), 0, input$sd_e311)
+        }
+        if(n_l_cov()>1){
+          df1a$Y112 <- input$loading_Y112*df1a$Xi2 + rnorm(N(), 0, input$sd_e112)
+          df1a$Y212 <- input$loading_Y212*df1a$Xi2 + rnorm(N(), 0, input$sd_e212)
+          df1a$Y312 <- input$loading_Y312*df1a$Xi2 + rnorm(N(), 0, input$sd_e312)
+        }
+        #df1a$PrX <- exp(0.0 + .4*Xi1 + 0.6*Xi2) / (1 + exp(0.0 + 0.4*Xi1 + 0.6*Xi2))
+
+        return(df1a)
+      })
       
 
-    
-    
-    
-    
-
-    
-    
-    # Messung von Xi1 durch messfehlerbehaftete Kovariaten
-    # Z11 <- 2*Xi1 + ceta11
-    # Z12 <- 2.5*Xi1 + ceta12
-    # Z13 <- 3*Xi1 + ceta13
-    # 
-    # # Messung von Xi2 durch messfehlerbehaftete Kovariaten
-    # Z21 <- 2.5*Xi2 + ceta21
-    # Z22 <- 3.5*Xi2 + ceta22
-    # Z23 <- 4*Xi2 + ceta23
-    
 
     ############################################ Raykov's idea ###############################################
     
@@ -597,13 +595,8 @@ shinyServer(
     
     
     output$t <- renderTable(
-      head(df())
+      head(data())
     )
-    
-    
-    
-    
-    
     
     
     

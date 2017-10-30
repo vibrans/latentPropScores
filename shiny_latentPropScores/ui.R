@@ -187,6 +187,14 @@ shinyUI(fluidPage(
                   uiOutput("cov")
 
        ),
+       ############# Specifying Selection Bias ##########
+       tabPanel('Bedingte Behandlungswahrscheinlichkeit',
+                radioButtons(inputId="conf", label="Wähle Voreinstellungen",
+                             choices=c("Probitlink"="probit", "Logitlink"="logit")),
+                uiOutput("PrX")
+        ),
+                
+                         
 
        ############# Regression #############
        # always manifest continuous covariates first and then latent continuous covariates
