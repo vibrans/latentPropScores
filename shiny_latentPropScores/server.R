@@ -9,23 +9,68 @@ shinyServer(
       #PX1 <- exp(0.0 + .4*Xi1 + 0.6*Xi2) / (1 + exp(0.0 + 0.4*Xi1 + 0.6*Xi2))
       if(n_m_cov()==1 & n_l_cov()==1){
         tagList(
-          h5("P(X|Z1, Xi1) ="),
-          
+          withMathJax(
+            helpText('$$ P(X|Z1, Xi1) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1)}
+                                        {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1)}\\!$$')),
+          fluidRow(column(2),
+                   column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
+                   column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
+                   column(2, numericInput(inputId="alpha2", label=withMathJax('$$\\alpha_2$$'), value=1)))
+                   
         )
       }else if(n_m_cov()==1 & n_l_cov()==2){
-        h5("P(X|Z1, Xi1, Xi2) ="),
-        
+        tagList(
+          withMathJax(
+            helpText('$$ P(X|Z1, Xi1, Xi2) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1 + \\alpha_3 \\xi_2)}
+                     {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1 + \\alpha_3 \\xi_2)}\\!$$')),
+          fluidRow(column(2),
+                   column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
+                   column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
+                   column(2, numericInput(inputId="alpha2", label=withMathJax('$$\\alpha_2$$'), value=1)),
+                   column(2, numericInput(inputId="alpha3", label=withMathJax('$$\\alpha_3$$'), value=1)))
+        )
       }else if(n_m_cov()==2 & n_l_cov()==2){
-        h5("P(X|Z1, Z2, Xi1, Xi2) ="),
-        
+        tagList(
+          withMathJax(
+            helpText('$$ P(X|Z1, Z2, Xi1, Xi2) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 Z_2 + \\alpha_3 \\xi_1 + \\alpha_4 \\xi_2)}
+                     {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 Z_2 +\\alpha_3 \\xi_1 + \\alpha_4 \\xi_2)}\\!$$')),
+          fluidRow(column(1),
+                   column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
+                   column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
+                   column(2, numericInput(inputId="alpha2", label=withMathJax('$$\\alpha_2$$'), value=1)),
+                   column(2, numericInput(inputId="alpha3", label=withMathJax('$$\\alpha_3$$'), value=1)),
+                   column(2, numericInput(inputId="alpha4", label=withMathJax('$$\\alpha_4$$'), value=1)))
+        )
       }else if(n_m_cov()==2 & n_l_cov()==1){
-        h5("P(X|Z1, Z2, Xi1) ="),
-        
+        tagList(
+          withMathJax(
+            helpText('$$ P(X|Z1, Z2, Xi1) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 Z_2 + \\alpha_3 \\xi_1)}
+                     {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 Z_2 + \\alpha_3 \\xi_2)}\\!$$')),
+          fluidRow(column(2),
+                   column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
+                   column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
+                   column(2, numericInput(inputId="alpha2", label=withMathJax('$$\\alpha_2$$'), value=1)),
+                   column(2, numericInput(inputId="alpha3", label=withMathJax('$$\\alpha_3$$'), value=1)))
+        )
       }else if(n_m_cov()==0 & n_l_cov()==2){
-        h5("P(X|Xi1, Xi2) ="),
-        
+        tagList(
+          withMathJax(
+            helpText('$$ P(X|Xi1, Xi2) = \\frac{exp(\\alpha_0 + \\alpha_1 \\xi_1 + \\alpha_2 \\xi_2)}
+                     {1+exp(\\alpha_0 + \\alpha_1 \\xi_1 + \\alpha_2 \\xi_2)}\\!$$')),
+          fluidRow(column(1),
+                   column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
+                   column(1),
+                   column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
+                   column(1),
+                   column(2, numericInput(inputId="alpha2", label=withMathJax('$$\\alpha_2$$'), value=1)))
+        )
+
       }
     })
+    
+    
+    
+    
     ## layout of tabPanel regression
     output$regression <- renderUI({
       if(n_m_cov() == 1 & n_l_cov() == 1){
