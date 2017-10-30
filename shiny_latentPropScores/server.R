@@ -533,19 +533,33 @@ shinyServer(
                              cov_z1_xi2(), cov_z2_xi2(), cov_xi1_xi2(), var_xi2()), nrow=4), empirical=TRUE)),
               c("Z1", "Z2", "Xi1", "Xi2"))
     }
+      # if(n_l_cov()>0){
+      #   df$Y111 <- input$loading_Y111*df$Xi1 + rnorm(N(), 0, input$sd_e111)
+      #   df$Y211 <- rnorm(N(), 0, input$sd_e211)
+      #   df$Y311 <- rnorm(N(), 0, input$sd_e311)
+      # }
+      # if(n_l_cov()>1){
+      #   df$Y112 <- rnorm(N(), 0, input$sd_e112)
+      #   df$Y212 <- rnorm(N(), 0, input$sd_e212)
+      #   df$Y312 <- rnorm(N(), 0, input$sd_e312)
+      # }
     })
 
     ########## indicator variables for latent covariates
-      if(isolate(n_l_cov())>0){
-        Y111 <- reactive(input$loading_Y111*data()$Xi1 + rnorm(n, 0, input$sd_e111))
-        Y211 <- reactive(rnorm(n, 0, input$sd_e211))
-        Y311 <- reactive(rnorm(n, 0, input$sd_e311))
-      }
-      if(isolate(n_l_cov())>1){
-        Y112 <- reactive(rnorm(n, 0, input$sd_e112))
-        Y212 <- reactive(rnorm(n, 0, input$sd_e212))
-        Y312 <- reactive(rnorm(n, 0, input$sd_e312))
-      }
+      # data <- reactive({
+      #   if(n_l_cov()>0){
+      #     df()$Y111 <- input$loading_Y111*df()$Xi1 + rnorm(n, 0, input$sd_e111)
+      #     df()$Y211 <- rnorm(n, 0, input$sd_e211)
+      #     df()$Y311 <- rnorm(n, 0, input$sd_e311)
+      #   }
+      #   if(n_l_cov()>1){
+      #     df()$Y112 <- rnorm(n, 0, input$sd_e112)
+      #     df()$Y212 <- rnorm(n, 0, input$sd_e212)
+      #     df()$Y312 <- rnorm(n, 0, input$sd_e312)
+      #   }
+      # })
+      
+      
 
     
     
