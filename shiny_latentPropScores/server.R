@@ -537,34 +537,30 @@ shinyServer(
 
     }else if(n_m_cov()==1 & n_l_cov()==1){
       # means
-      mean_z1 <- reactive(input$mean_z1)
-      mean_xi1 <- reactive(input$mean_xi1)
+      mean_z1 <- input$mean_z1
+      mean_xi1 <- input$mean_xi1
       # compute variances
-      var_z1 <- reactive(input$sd_z1^2)
-      var_xi1 <- reactive(input$sd_xi1^2)
+      var_z1 <- input$sd_z1^2
+      var_xi1 <- input$sd_xi1^2
       # get covariances
-      cov_z1_xi1 <- reactive(input$cov_z1_xi1)
+      cov_z1_xi1 <- input$cov_z1_xi1
       # create dataframe
-      df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_xi1()),
-              Sigma=matrix(c(var_z1(), cov_z1_xi1(), cov_z1_xi1(), var_xi1()), nrow=2), empirical=TRUE)),
-              c("Z1", "Xi1"))
-      a <- reactive(input$alpha0)
-      print(a())
-      df$logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Xi2
-      print(head(df))
-      # df$PrX <- exp(logit)/(1+exp(logit))
-      # if(link()=="probit"){
-      #   df$X <- rbinom(N(), 1, rnorm(logit))
-      # }else if(link()=="logit"){
-      #   df$X <- rbinom(N(), 1, df$PrX)
-      # }
-      # return(df)
-
+      df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1, mean_xi1),
+                                        Sigma=matrix(c(var_z1, cov_z1_xi1, cov_z1_xi1, var_xi1), nrow=2), empirical=TRUE)),
+                     c("Z1", "Xi1"))
+      logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Xi1
+      df$PrX <- exp(logit)/(1+exp(logit))
+      if(link()=="probit"){
+        df$X <- rbinom(N(), 1, pnorm(logit))
+      }else if(link()=="logit"){
+        df$X <- rbinom(N(), 1, df$PrX)
+      }
+      return(df)
 
     }else if(n_m_cov()==1 & n_l_cov()==2){
       # means
-      mean_z1 <- reactive(input$mean_z1)
-      mean_xi1 <- reactive(input$mean_xi1)
+      mean_z1 <- input$mean_z1
+      mean_xi1 <- input$mean_xi1
       mean_xi2 <- reactive(input$mean_xi2)
       # compute variances
       var_z1 <- reactive(input$sd_z1^2)
