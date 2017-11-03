@@ -65,8 +65,6 @@ shinyServer(
 
       }
     })
-    # leads to validation of inputs from tab 'PrX' even if user does not open the tab
-    outputOptions(output, "PrX", suspendWhenHidden = FALSE)
     
     
     ## layout of tabPanel regression
@@ -111,8 +109,8 @@ shinyServer(
                    column(2, div('$$SD(\\zeta)$$')),
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
-                   column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
-                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
+                   column(2, p("0", align = "center")),
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%')))
         )
       }else if(n_m_cov() == 1 & n_l_cov() == 2){
         tagList(
@@ -160,8 +158,8 @@ shinyServer(
                    column(2, div('$$SD(\\zeta), $$')),
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
-                   column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
-                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
+                   column(2, p("0", align = "center")),
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%')))
         )
       }else if(n_m_cov() == 2 & n_l_cov() == 2){
         tagList(
@@ -223,8 +221,8 @@ shinyServer(
                    column(2, div('$$SD(\\zeta)$$')),
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
-                   column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
-                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
+                   column(2, p("0", align = "center")),
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%')))
         )
       }else if(n_m_cov() == 2 & n_l_cov() == 1){
         tagList(
@@ -272,8 +270,8 @@ shinyServer(
                    column(2, div('$$SD(\\zeta)$$')),
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
-                   column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
-                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
+                   column(2, p("0", align = "center")),
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%')))
         )
       }else if(n_m_cov() == 0 & n_l_cov() == 2){
         tagList(
@@ -315,11 +313,15 @@ shinyServer(
                    column(2, div('$$SD(\\zeta)$$')),
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
-                   column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
-                   column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
+                   column(2, p("0", align = "center")),
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%')))
         )
       }
     })
+    
+    ## straight-away validation of inputs from tab 'PrX' and tab 'Regression' even if user does not open the tab
+    outputOptions(output, "PrX", suspendWhenHidden = FALSE)
+    outputOptions(output, "regression", suspendWhenHidden = FALSE)
     
     ## specify covariances
     output$cov <- renderUI({
@@ -391,6 +393,8 @@ shinyServer(
          v$v_alpha0 <- 0
          v$v_alpha1 <- 1
          v$v_alpha2 <- 1
+         v$v_alpha3 <- 1
+         v$v_alpha4 <- 1
          ######## regression
          # BE AWARE: coefficients of manifest covariates first and then of latent covariates
          # adapt coefficients of baseline function g0
@@ -513,7 +517,133 @@ shinyServer(
     ### Simulation of normally distributed independent continuous variables
      #!# problem: please create nicer error message for semidefiniteness
     df1 <- reactive({
-      if(n_m_cov()==0 & n_l_cov()==2){
+      if(n_m_cov()==1 & n_l_cov()==1){
+        # means
+        mean_z1 <- input$mean_z1
+        mean_xi1 <- input$mean_xi1
+        # compute variances
+        var_z1 <- input$sd_z1^2
+        var_xi1 <- input$sd_xi1^2
+        # get covariances
+        cov_z1_xi1 <- input$cov_z1_xi1
+        # create dataframe
+        df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1, mean_xi1),
+                                          Sigma=matrix(c(var_z1, cov_z1_xi1, cov_z1_xi1, var_xi1), nrow=2), empirical=TRUE)),
+                       c("Z1", "Xi1"))
+        logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Xi1
+        df$PrX <- exp(logit)/(1+exp(logit))
+        if(link()=="probit"){
+          df$X <- rbinom(N(), 1, pnorm(logit))
+        }else if(link()=="logit"){
+          df$X <- rbinom(N(), 1, df$PrX)
+        }
+        print(input$gamma000)
+        df$Y <- input$gamma000 + input$gamma001*df$Z1 + input$gamma002*df$Xi1 +
+                  (input$gamma100 + input$gamma101*df$Z1 + input$gamma102*df$Xi1)*df$X +
+                    rnorm(N(), 0, input$sd_zeta)
+        return(df)
+        
+      }else if(n_m_cov()==1 & n_l_cov()==2){
+        # means
+        mean_z1 <- input$mean_z1
+        mean_xi1 <- input$mean_xi1
+        mean_xi2 <- input$mean_xi2
+        # compute variances
+        var_z1 <- input$sd_z1^2
+        var_xi1 <- input$sd_xi1^2
+        var_xi2 <- input$sd_xi2^2
+        # get covariances
+        cov_z1_xi1 <- input$cov_z1_xi1
+        cov_z1_xi2 <- input$cov_z1_xi2
+        cov_xi1_xi2 <- input$cov_xi1_xi2
+        # create dataframe
+        df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1, mean_xi1, mean_xi2),
+                                          Sigma=matrix(c(var_z1, cov_z1_xi1, cov_z1_xi2,
+                                                         cov_z1_xi1, var_xi1, cov_xi1_xi2,
+                                                         cov_z1_xi2, cov_xi1_xi2, var_xi2), nrow=3), empirical=TRUE)),
+                       c("Z1", "Xi1", "Xi2"))
+        logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Xi1 + input$alpha3*df$Xi2
+        df$PrX <- exp(logit)/(1+exp(logit))
+        if(link()=="probit"){
+          df$X <- rbinom(N(), 1, pnorm(logit))
+        }else if(link()=="logit"){
+          df$X <- rbinom(N(), 1, df$PrX)
+        }
+        df$Y <- input$gamma000 + input$gamma001*df$Z1 + input$gamma002*df$Xi1 + input$gamma003*df$Xi2 +
+                (input$gamma100 + input$gamma101*df$Z1 + input$gamma102*df$Xi1 +input$gamma103*df$Xi2)*df$X + 
+                rnorm(N(), 0, input$sd_zeta)
+        return(df)
+        
+      }else if(n_m_cov()==2 & n_l_cov()==2){
+        # means
+        mean_z1 <- input$mean_z1
+        mean_z2 <- input$mean_z2
+        mean_xi1 <- input$mean_xi1
+        mean_xi2 <- input$mean_xi2
+        # compute variances
+        var_z1 <- input$sd_z1^2
+        var_z2 <- input$sd_z2^2
+        var_xi1 <- input$sd_xi1^2
+        var_xi2 <- input$sd_xi2^2
+        # get covariances
+        cov_z1_xi1 <- input$cov_z1_xi1
+        cov_z1_xi2 <- input$cov_z1_xi2
+        cov_z1_z2 <- input$cov_z1_z2
+        cov_z2_xi1 <- input$cov_z2_xi1
+        cov_z2_xi2 <- input$cov_z2_xi2
+        cov_xi1_xi2 <- input$cov_xi1_xi2
+        # create dataframe
+        df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1, mean_z2, mean_xi1, mean_xi2),
+                                          Sigma=matrix(c(var_z1, cov_z1_z2, cov_z1_xi1, cov_z1_xi2,
+                                                         cov_z1_z2, var_z2, cov_z2_xi1, cov_z2_xi2,
+                                                         cov_z1_xi1, cov_z2_xi1, var_xi1, cov_xi1_xi2,
+                                                         cov_z1_xi2, cov_z2_xi2, cov_xi1_xi2, var_xi2), nrow=4), empirical=TRUE)),
+                       c("Z1", "Z2", "Xi1", "Xi2"))
+        # simulate X
+        logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Z2 + input$alpha3*df$Xi1 + input$alpha4*df$Xi2
+        df$PrX <- exp(logit)/(1+exp(logit))
+        if(link()=="probit"){
+          df$X <- rbinom(N(), 1, pnorm(logit))
+        }else if(link()=="logit"){
+          df$X <- rbinom(N(), 1, df$PrX)
+        }
+        df$Y <- input$gamma000 + input$gamma001*df$Z1 + input$gamma002*df$Z2 + input$gamma003*df$Xi1 + input$gamma004*df$Xi2 +
+          (input$gamma100 + input$gamma101*df$Z1 + input$gamma102*df$Z2 +input$gamma103*df$Xi1 + input$gamma104*df$Xi2)*df$X + 
+          rnorm(N(), 0, input$sd_zeta)
+        return(df)
+        
+      }else if(n_m_cov()==2 & n_l_cov()==1){
+        # means
+        mean_z1 <- input$mean_z1
+        mean_z2 <- input$mean_z2
+        mean_xi1 <- input$mean_xi1
+        # compute variances
+        var_z1 <- input$sd_z1^2
+        var_z2 <- input$sd_z2^2
+        var_xi1 <- input$sd_xi1^2
+        # get covariances
+        cov_z1_z2 <- input$cov_z1_z2
+        cov_z1_xi1 <- input$cov_z1_xi1
+        cov_z2_xi1 <- input$cov_z2_xi1
+        # create dataframe
+        df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1, mean_z2, mean_xi1),
+                                          Sigma=matrix(c(var_z1, cov_z1_z2, cov_z1_xi1,
+                                                         cov_z1_z2, var_z2, cov_z2_xi1,
+                                                         cov_z1_xi1, cov_z2_xi1, var_xi1), nrow=3), empirical=TRUE)),
+                       c("Z1", "Z2", "Xi1"))
+        logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Z2 + input$alpha3*df$Xi1
+        df$PrX <- exp(logit)/(1+exp(logit))
+        if(link()=="probit"){
+          df$X <- rbinom(N(), 1, pnorm(logit))
+        }else if(link()=="logit"){
+          df$X <- rbinom(N(), 1, df$PrX)
+        }
+        df$Y <- input$gamma000 + input$gamma001*df$Z1 + input$gamma002*df$Z2 + input$gamma003*df$Xi1 +
+                    (input$gamma100 + input$gamma101*df$Z1 + input$gamma102*df$Z2 +input$gamma103*df$Xi1)*df$X + 
+                      rnorm(N(), 0, input$sd_zeta)
+        return(df)
+        
+      }else if(n_m_cov()==0 & n_l_cov()==2){
         # means
         mean_xi1 <- reactive(input$mean_xi1)
         mean_xi2 <- reactive(input$mean_xi2)
@@ -529,124 +659,14 @@ shinyServer(
         logit <- input$alpha0 + input$alpha1*df$Xi1 + input$alpha2*df$Xi2
         df$PrX <- exp(logit)/(1+exp(logit))
         if(link()=="probit"){
-          df$X <- rbinom(N(), 1, rnorm(logit))
+          df$X <- rbinom(N(), 1, pnorm(logit))
         }else if(link()=="logit"){
           df$X <- rbinom(N(), 1, df$PrX)
         }
+        df$Y <- input$gamma000 + input$gamma001*df$Xi1 + input$gamma002*df$Xi2 + 
+                    (input$gamma100 + input$gamma101*df$Xi1 + input$gamma102*df$Xi2)*df$X + 
+                      rnorm(N(), 0, input$sd_zeta)
         return(df)
-
-    }else if(n_m_cov()==1 & n_l_cov()==1){
-      # means
-      mean_z1 <- input$mean_z1
-      mean_xi1 <- input$mean_xi1
-      # compute variances
-      var_z1 <- input$sd_z1^2
-      var_xi1 <- input$sd_xi1^2
-      # get covariances
-      cov_z1_xi1 <- input$cov_z1_xi1
-      # create dataframe
-      df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1, mean_xi1),
-                                        Sigma=matrix(c(var_z1, cov_z1_xi1, cov_z1_xi1, var_xi1), nrow=2), empirical=TRUE)),
-                     c("Z1", "Xi1"))
-      logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Xi1
-      df$PrX <- exp(logit)/(1+exp(logit))
-      if(link()=="probit"){
-        df$X <- rbinom(N(), 1, pnorm(logit))
-      }else if(link()=="logit"){
-        df$X <- rbinom(N(), 1, df$PrX)
-      }
-      return(df)
-
-    }else if(n_m_cov()==1 & n_l_cov()==2){
-      # means
-      mean_z1 <- input$mean_z1
-      mean_xi1 <- input$mean_xi1
-      mean_xi2 <- reactive(input$mean_xi2)
-      # compute variances
-      var_z1 <- reactive(input$sd_z1^2)
-      var_xi1 <- reactive(input$sd_xi1^2)
-      var_xi2 <- reactive(input$sd_xi2^2)
-      # get covariances
-      cov_z1_xi1 <- reactive(input$cov_z1_xi1)
-      cov_z1_xi2 <- reactive(input$cov_z1_xi2)
-      cov_xi1_xi2 <- reactive(input$cov_xi1_xi2)
-      # create dataframe
-      df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_xi1(), mean_xi2()),
-              Sigma=matrix(c(var_z1(), cov_z1_xi1(), cov_z1_xi2(),
-                             cov_z1_xi1(), var_xi1(), cov_xi1_xi2(),
-                             cov_z1_xi2(), cov_xi1_xi2(), var_xi2()), nrow=3), empirical=TRUE)),
-              c("Z1", "Xi1", "Xi2"))
-      logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Xi1 + input$alpha3*df$Xi2
-      df$PrX <- exp(logit)/(1+exp(logit))
-      if(link()=="probit"){
-        df$X <- rbinom(N(), 1, rnorm(logit))
-      }else if(link()=="logit"){
-        df$X <- rbinom(N(), 1, df$PrX)
-      }
-      return(df)
-
-    }else if(n_m_cov()==2 & n_l_cov()==1){
-      # means
-      mean_z1 <- reactive(input$mean_z1)
-      mean_z2 <- reactive(input$mean_z2)
-      mean_xi1 <- reactive(input$mean_xi1)
-      # compute variances
-      var_z1 <- reactive(input$sd_z1^2)
-      var_z2 <- reactive(input$sd_z2^2)
-      var_xi1 <- reactive(input$sd_xi1^2)
-      # get covariances
-      cov_z1_z2 <- reactive(input$cov_z1_z2)
-      cov_z1_xi1 <- reactive(input$cov_z1_xi1)
-      cov_z2_xi1 <- reactive(input$cov_z2_xi1)
-      # create dataframe
-      df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_z2(), mean_xi1()),
-              Sigma=matrix(c(var_z1(), cov_z1_z2(), cov_z1_xi1(),
-                             cov_z1_z2(), var_z2(), cov_z2_xi1(),
-                             cov_z1_xi1(), cov_z2_xi1(), var_xi1()), nrow=3), empirical=TRUE)),
-              c("Z1", "Z2", "Xi1"))
-      logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Z2 + input$alpha3*df$Xi1
-      df$PrX <- exp(logit)/(1+exp(logit))
-      if(link()=="probit"){
-        df$X <- rbinom(N(), 1, rnorm(logit))
-      }else if(link()=="logit"){
-        df$X <- rbinom(N(), 1, df$PrX)
-      }
-      return(df)
-
-    }else if(n_m_cov()==2 & n_l_cov()==2){
-      # means
-      mean_z1 <- reactive(input$mean_z1)
-      mean_z2 <- reactive(input$mean_z2)
-      mean_xi1 <- reactive(input$mean_xi1)
-      mean_xi2 <- reactive(input$mean_xi2)
-      # compute variances
-      var_z1 <- reactive(input$sd_z1^2)
-      var_z2 <- reactive(input$sd_z2^2)
-      var_xi1 <- reactive(input$sd_xi1^2)
-      var_xi2 <- reactive(input$sd_xi2^2)
-      # get covariances
-      cov_z1_xi1 <- reactive(input$cov_z1_xi1)
-      cov_z1_xi2 <- reactive(input$cov_z1_xi2)
-      cov_z1_z2 <- reactive(input$cov_z1_z2)
-      cov_z2_xi1 <- reactive(input$cov_z2_xi1)
-      cov_z2_xi2 <- reactive(input$cov_z2_xi2)
-      cov_xi1_xi2 <- reactive(input$cov_xi1_xi2)
-      # create dataframe
-      df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_z2(), mean_xi1(), mean_xi2()),
-              Sigma=matrix(c(var_z1(), cov_z1_z2(), cov_z1_xi1(), cov_z1_xi2(),
-                             cov_z1_z2(), var_z2(), cov_z2_xi1(), cov_z2_xi2(),
-                             cov_z1_xi1(), cov_z2_xi1(), var_xi1(), cov_xi1_xi2(),
-                             cov_z1_xi2(), cov_z2_xi2(), cov_xi1_xi2(), var_xi2()), nrow=4), empirical=TRUE)),
-              c("Z1", "Z2", "Xi1", "Xi2"))
-      # simulate X
-      logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Z2 + input$alpha3*df$Xi1 + input$alpha4*df$Xi2
-      df$PrX <- exp(logit)/(1+exp(logit))
-      if(link()=="probit"){
-        df$X <- rbinom(N(), 1, rnorm(logit))
-      }else if(link()=="logit"){
-        df$X <- rbinom(N(), 1, df$PrX)
-      }
-      return(df)
       }
     })
 
@@ -655,17 +675,16 @@ shinyServer(
       data <- reactive({
         if(n_l_cov()>0){
           df1a <- df1()
-          df1a$Y111 <- input$loading_Y111*df1a$Xi1 + rnorm(N(), 0, input$sd_e111)
-          df1a$Y211 <- input$loading_Y211*df1a$Xi1 + rnorm(N(), 0, input$sd_e211)
-          df1a$Y311 <- input$loading_Y311*df1a$Xi1 + rnorm(N(), 0, input$sd_e311)
+          df1a$Y111 <- input$intercept_Y111 + input$loading_Y111*df1a$Xi1 + rnorm(N(), 0, input$sd_e111)
+          df1a$Y211 <- input$intercept_Y211 + input$loading_Y211*df1a$Xi1 + rnorm(N(), 0, input$sd_e211)
+          df1a$Y311 <- input$intercept_Y311 + input$loading_Y311*df1a$Xi1 + rnorm(N(), 0, input$sd_e311)
         }
         if(n_l_cov()>1){
-          df1a$Y112 <- input$loading_Y112*df1a$Xi2 + rnorm(N(), 0, input$sd_e112)
-          df1a$Y212 <- input$loading_Y212*df1a$Xi2 + rnorm(N(), 0, input$sd_e212)
-          df1a$Y312 <- input$loading_Y312*df1a$Xi2 + rnorm(N(), 0, input$sd_e312)
+          df1a$Y112 <- input$intercept_Y112 + input$loading_Y112*df1a$Xi2 + rnorm(N(), 0, input$sd_e112)
+          df1a$Y212 <- input$intercept_Y212 + input$loading_Y212*df1a$Xi2 + rnorm(N(), 0, input$sd_e212)
+          df1a$Y312 <- input$intercept_Y312 + input$loading_Y312*df1a$Xi2 + rnorm(N(), 0, input$sd_e312)
         }
         
-
         return(df1a)
       })
       
