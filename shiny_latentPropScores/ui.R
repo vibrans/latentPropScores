@@ -189,7 +189,7 @@ shinyUI(fluidPage(
        ),
        ############# Specifying Selection Bias ##########
        tabPanel('Bedingte Behandlungswahrscheinlichkeit',
-                radioButtons(inputId="conf", label="Wähle Voreinstellungen",
+                radioButtons(inputId="link", label="Wähle Voreinstellungen",
                              choices=c("Probitlink"="probit", "Logitlink"="logit")),
                 uiOutput("PrX")
         ),
@@ -211,9 +211,10 @@ shinyUI(fluidPage(
                  tableOutput("t")),
         tabPanel('Effect-Lite-R-Methode'),
         tabPanel('neue latente PS-Methode')
-      )
+      ),
       
       #uiOutput("ahhh")
+      textOutput("text")
     )
   )
 )

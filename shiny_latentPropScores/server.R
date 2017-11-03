@@ -1,4 +1,3 @@
-
 shinyServer(
   function(input, output, session){
     ## some input variables
@@ -7,27 +6,26 @@ shinyServer(
     
     ## layout for tabPanel conditional treatment probability
     output$PrX <- renderUI({
-      #PX1 <- exp(0.0 + .4*Xi1 + 0.6*Xi2) / (1 + exp(0.0 + 0.4*Xi1 + 0.6*Xi2))
       if(n_m_cov()==1 & n_l_cov()==1){
         tagList(
           withMathJax(
             helpText('$$ P(X|Z1, Xi1) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1)}
                                         {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1)}\\!$$')),
           fluidRow(column(2),
-                   column(2, numericInput(inputId="alpha0", label=div('$$\\alpha_0$$'), value=0)),
-                   column(2, numericInput(inputId="alpha1", label=div('$$\\alpha_1$$'), value=1)),
-                   column(2, numericInput(inputId="alpha2", label=div('$$\\alpha_2$$'), value=1)))
+                   column(2, numericInput(inputId="alpha0", label=div('$$\\alpha_0$$'), value=v$v_alpha0)),
+                   column(2, numericInput(inputId="alpha1", label=div('$$\\alpha_1$$'), value=v$v_alpha1)),
+                   column(2, numericInput(inputId="alpha2", label=div('$$\\alpha_2$$'), value=v$v_alpha2)))
                    
         )
       }else if(n_m_cov()==1 & n_l_cov()==2){
         tagList(
-          div('$$ P(X|Z1, Xi1, Xi2) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1 + \\alpha_3 \\xi_2)}
+          withMathJax('$$ P(X|Z1, Xi1, Xi2) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1 + \\alpha_3 \\xi_2)}
                      {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 \\xi_1 + \\alpha_3 \\xi_2)}\\!$$'),
           fluidRow(column(2),
-                   column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
-                   column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
-                   column(2, numericInput(inputId="alpha2", label=withMathJax('$$\\alpha_2$$'), value=1)),
-                   column(2, numericInput(inputId="alpha3", label=withMathJax('$$\\alpha_3$$'), value=1)))
+                   column(2, numericInput(inputId="alpha0", label=div('$$\\alpha_0$$'), value=v$v_alpha0)),
+                   column(2, numericInput(inputId="alpha1", label=div('$$\\alpha_1$$'), value=v$v_alpha1)),
+                   column(2, numericInput(inputId="alpha2", label=div('$$\\alpha_2$$'), value=v$v_alpha2)),
+                   column(2, numericInput(inputId="alpha3", label=div('$$\\alpha_3$$'), value=v$v_alpha3)))
         )
       }else if(n_m_cov()==2 & n_l_cov()==2){
         tagList(
@@ -35,11 +33,11 @@ shinyServer(
             helpText('$$ P(X|Z1, Z2, Xi1, Xi2) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 Z_2 + \\alpha_3 \\xi_1 + \\alpha_4 \\xi_2)}
                      {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 Z_2 +\\alpha_3 \\xi_1 + \\alpha_4 \\xi_2)}\\!$$')),
           fluidRow(column(1),
-                   column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
-                   column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
-                   column(2, numericInput(inputId="alpha2", label=withMathJax('$$\\alpha_2$$'), value=1)),
-                   column(2, numericInput(inputId="alpha3", label=withMathJax('$$\\alpha_3$$'), value=1)),
-                   column(2, numericInput(inputId="alpha4", label=withMathJax('$$\\alpha_4$$'), value=1)))
+                   column(2, numericInput(inputId="alpha0", label=div('$$\\alpha_0$$'), value=v$v_alpha0)),
+                   column(2, numericInput(inputId="alpha1", label=div('$$\\alpha_1$$'), value=v$v_alpha1)),
+                   column(2, numericInput(inputId="alpha2", label=div('$$\\alpha_2$$'), value=v$v_alpha2)),
+                   column(2, numericInput(inputId="alpha3", label=div('$$\\alpha_3$$'), value=v$v_alpha3)),
+                   column(2, numericInput(inputId="alpha4", label=div('$$\\alpha_4$$'), value=v$v_alpha4)))
         )
       }else if(n_m_cov()==2 & n_l_cov()==1){
         tagList(
@@ -47,10 +45,10 @@ shinyServer(
             helpText('$$ P(X|Z1, Z2, Xi1) = \\frac{exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 Z_2 + \\alpha_3 \\xi_1)}
                      {1+exp(\\alpha_0 + \\alpha_1 Z_1 + \\alpha_2 Z_2 + \\alpha_3 \\xi_2)}\\!$$')),
           fluidRow(column(2),
-                   column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
-                   column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
-                   column(2, numericInput(inputId="alpha2", label=withMathJax('$$\\alpha_2$$'), value=1)),
-                   column(2, numericInput(inputId="alpha3", label=withMathJax('$$\\alpha_3$$'), value=1)))
+                   column(2, numericInput(inputId="alpha0", label=div('$$\\alpha_0$$'), value=v$v_alpha0)),
+                   column(2, numericInput(inputId="alpha1", label=div('$$\\alpha_1$$'), value=v$v_alpha1)),
+                   column(2, numericInput(inputId="alpha2", label=div('$$\\alpha_2$$'), value=v$v_alpha2)),
+                   column(2, numericInput(inputId="alpha3", label=div('$$\\alpha_3$$'), value=v$v_alpha3)))
         )
       }else if(n_m_cov()==0 & n_l_cov()==2){
         tagList(
@@ -58,16 +56,17 @@ shinyServer(
             helpText('$$ P(X|Xi1, Xi2) = \\frac{exp(\\alpha_0 + \\alpha_1 \\xi_1 + \\alpha_2 \\xi_2)}
                      {1+exp(\\alpha_0 + \\alpha_1 \\xi_1 + \\alpha_2 \\xi_2)}\\!$$')),
           fluidRow(column(1),
-                   column(2, numericInput(inputId="alpha0", label=withMathJax('$$\\alpha_0$$'), value=0)),
+                   column(2, numericInput(inputId="alpha0", label=div('$$\\alpha_0$$'), value=v$v_alpha0)),
                    column(1),
-                   column(2, numericInput(inputId="alpha1", label=withMathJax('$$\\alpha_1$$'), value=1)),
+                   column(2, numericInput(inputId="alpha1", label=div('$$\\alpha_1$$'), value=v$v_alpha1)),
                    column(1),
-                   column(2, numericInput(inputId="alpha2", label=withMathJax('$$\\alpha_2$$'), value=1)))
+                   column(2, numericInput(inputId="alpha2", label=div('$$\\alpha_2$$'), value=v$v_alpha2)))
         )
 
       }
     })
-    
+    # leads to validation of inputs from tab 'PrX' even if user does not open the tab
+    outputOptions(output, "PrX", suspendWhenHidden = FALSE)
     
     
     ## layout of tabPanel regression
@@ -78,12 +77,11 @@ shinyServer(
           p("Y ="),
           br(),
           # baseline function g0 (regression in group X=0)
-          fluidRow(#column(2, p("\u03B3\u2080\u2080\u2080")),
-                   column(2, withMathJax('$$\\gamma_{000}$$')),
+          fluidRow(column(2, withMathJax('$$\\gamma_{000}$$')),
                    column(1, div('$$+$$')),
-                   column(2, p("\u03B3\u2080\u2080\u2081*Z\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2082*Xi\u2081"))),
+                   column(2, div('$$\\gamma_{001}Z_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{002}\\xi_1$$'))),
           fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=v$v_gamma000, width='100%')),
                    column(1),
                    column(2, numericInput(inputId="gamma001", label=NULL, value=v$v_gamma001, width='100%')),
@@ -92,13 +90,13 @@ shinyServer(
           tags$hr(style="border-color: purple;"),
           br(),
           # effect function g1 (difference to group X=0)
-          fluidRow(column(1, p("+ (")),
-                   column(2, p("\u03B3\u2081\u2080\u2080")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2081*Z\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2082*Xi\u2081")),
-                   column(1, p(")*X"))),
+          fluidRow(column(1, div('$$+ ($$')),
+                   column(2, div('$$\\gamma_{100}$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{101}Z_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{102}\\xi_1$$')),
+                   column(1, div('$$)*X$$'))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="gamma100", label=NULL, value=v$v_gamma100, width='100%')),
                    column(1),
@@ -108,10 +106,10 @@ shinyServer(
           tags$hr(style="border-color: purple;"),
           br(),
           # residual
-          fluidRow(column(1, p("+ (")),
-                   column(2, p("Mean(\u03B6), ")),
-                   column(2, p("SD(\u03B6)")),
-                   column(1, p(")"))),
+          fluidRow(column(1, div('$$+ ($$')),
+                   column(2, div('$$Mean(\\zeta), $$')),
+                   column(2, div('$$SD(\\zeta)$$')),
+                   column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
                    column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
@@ -122,13 +120,13 @@ shinyServer(
           p("Y ="),
           br(),
           # baseline function g0 (regression in group X=0)
-          fluidRow(column(2, p("\u03B3\u2080\u2080\u2080")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2081*Z\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3_\u2080\u2080\u2082*Xi\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2083*Xi\u2082"))),
+          fluidRow(column(2, withMathJax('$$\\gamma_{000}$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{001}Z_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{002}\\xi1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{003}\\xi_2$$'))),
           fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=v$v_gamma000, width='100%')),
                    column(1),
                    column(2, numericInput(inputId="gamma001", label=NULL, value=v$v_gamma001, width='100%')),
@@ -139,14 +137,14 @@ shinyServer(
           tags$hr(style="border-color: purple;"),
           br(),
           # effect function g1 (difference to group X=0)
-          fluidRow(column(2, p("+ (\u03B3\u2081\u2080\u2080")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2081*Z\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2082*Xi\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2083*Xi\u2082")),
-                   column(1, p(")*X"))),
+          fluidRow(column(2, div('$$+ (\\gamma_{100}$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{101}Z_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{102}\\xi_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{103}\\xi_2$$')),
+                   column(1, div('$$)*X$$'))),
           fluidRow(column(2, numericInput(inputId="gamma100", label=NULL, value=v$v_gamma100, width='100%')),
                    column(1),
                    column(2, numericInput(inputId="gamma101", label=NULL, value=v$v_gamma101, width='100%')),
@@ -157,10 +155,10 @@ shinyServer(
           tags$hr(style="border-color: purple;"),
           br(),
           # residual
-          fluidRow(column(1, p("+ (")),
-                   column(2, p("Mean(\u03B6), ")),
-                   column(2, p(", SD(\u03B6)")),
-                   column(1, p(")"))),
+          fluidRow(column(1, div('$$+ ($$')),
+                   column(2, div('$$Mean(\\zeta), $$')),
+                   column(2, div('$$SD(\\zeta), $$')),
+                   column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
                    column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
@@ -171,11 +169,11 @@ shinyServer(
           p("Y ="),
           br(),
           # baseline function g0 (regression in group X=0)
-          fluidRow(column(2, p("\u03B3\u2080\u2080\u2080")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2081*Z\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2082*Z\u2081"))),
+          fluidRow(column(2, withMathJax('$$\\gamma_{000}$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{001}Z_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{002}Z_2$$'))),
           fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=v$v_gamma000, width='100%')),
                    column(1),
                    column(2, numericInput(inputId="gamma001", label=NULL, value=v$v_gamma001, width='100%')),
@@ -183,10 +181,10 @@ shinyServer(
                    column(2, numericInput(inputId="gamma002", label=NULL, value=v$v_gamma002, width='100%'))),
           # second part of baseline function in next row because of layout problems
           fluidRow(column(3),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2083*Xi\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2084*Xi\u2082"))),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{003}\\xi_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{004}\\xi_2$$'))),
           fluidRow(column(4),
                    column(2, numericInput(inputId="gamma003", label=NULL, value=v$v_gamma003, width='100%')),
                    column(1),
@@ -194,12 +192,12 @@ shinyServer(
           tags$hr(style="border-color: purple;"),
           br(),
           # effect function g1 (difference to group X=0)
-          fluidRow(column(1, p("+ (")),
-                   column(2, p("\u03B3\u2081\u2080\u2080")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2081*Z\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2082*Z\u2081"))),
+          fluidRow(column(1, div('$$+ ($$')),
+                   column(2, div('$$+ (\\gamma_{100}$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{101}Z_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{102}Z_2$$'))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="gamma100", label=NULL, value=v$v_gamma100, width='100%')),
                    column(1),
@@ -208,11 +206,11 @@ shinyServer(
                    column(2, numericInput(inputId="gamma102", label=NULL, value=v$v_gamma102, width='100%'))),
           # part two of effect function because of layout problems
           fluidRow(column(4),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2083*Xi\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2084*Xi2")),
-                   column(1, p(")*X"))),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{103}\\xi_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{104}\\xi_2$$')),
+                   column(1, div('$$)X$$'))),
           fluidRow(column(5),
                    column(2, numericInput(inputId="gamma103", label=NULL, value=v$v_gamma103, width='100%')),
                    column(1),
@@ -220,10 +218,10 @@ shinyServer(
           tags$hr(style="border-color: purple;"),
           br(),
           # residual
-          fluidRow(column(1, p("+ (")),
-                   column(2, p("Mean(\u03B6), ")),
-                   column(2, p(", SD(\u03B6)")),
-                   column(1, p(")"))),
+          fluidRow(column(1, div('$$+ ($$')),
+                   column(2, div('$$Mean(\\zeta), $$')),
+                   column(2, div('$$SD(\\zeta)$$')),
+                   column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
                    column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
@@ -234,13 +232,13 @@ shinyServer(
           p("Y ="),
           br(),
           # baseline function g0 (regression in group X=0)
-          fluidRow(column(2, p("\u03B3\u2080\u2080\u2080")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2081*Z\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3_\u2080\u2080\u2082*Z\u2082")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2083*Xi\u2081"))),
+          fluidRow(column(2, withMathJax('$$\\gamma_{000}$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{001}Z_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{002}Z_2$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{003}\\xi_1$$'))),
           fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=v$v_gamma000, width='100%')),
                    column(1),
                    column(2, numericInput(inputId="gamma001", label=NULL, value=v$v_gamma001, width='100%')),
@@ -251,14 +249,14 @@ shinyServer(
           tags$hr(style="border-color: purple;"),
           br(),
           # effect function g1 (difference to group X=0)
-          fluidRow(column(2, p("+ (\u03B3\u2081\u2080\u2080")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2081*Z\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2082*Z\u2082")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2083*Xi\u2081")),
-                   column(1, p(")*X"))),
+          fluidRow(column(2, div('$$+ (\\gamma_{100}$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{101}Z_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{102}Z_2$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{103}*Xi_1$$')),
+                   column(1, div('$$)*X$$'))),
           fluidRow(column(2, numericInput(inputId="gamma100", label=NULL, value=v$v_gamma100, width='100%')),
                    column(1),
                    column(2, numericInput(inputId="gamma101", label=NULL, value=v$v_gamma101, width='100%')),
@@ -269,10 +267,10 @@ shinyServer(
           tags$hr(style="border-color: purple;"),
           br(),
           # residual
-          fluidRow(column(1, p("+ (")),
-                   column(2, p("Mean(\u03B6), ")),
-                   column(2, p(", SD(\u03B6)")),
-                   column(1, p(")"))),
+          fluidRow(column(1, div('$$+ ($$')),
+                   column(2, div('$$Mean(\\zeta), $$')),
+                   column(2, div('$$SD(\\zeta)$$')),
+                   column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
                    column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
@@ -283,11 +281,11 @@ shinyServer(
           p("Y ="),
           br(),
           # baseline function g0 (regression in group X=0)
-          fluidRow(column(2, p("\u03B3\u2080\u2080\u2080")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2081*Xi\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2080\u2080\u2082*Xi2"))),
+          fluidRow(column(2, withMathJax('$$\\gamma_{000}$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{001}\\xi_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{002}\\xi_2$$'))),
           fluidRow(column(2, numericInput(inputId="gamma000", label=NULL, value=v$v_gamma000, width='100%')),
                    column(1),
                    column(2, numericInput(inputId="gamma001", label=NULL, value=v$v_gamma001, width='100%')),
@@ -296,13 +294,13 @@ shinyServer(
           tags$hr(style="border-color: purple;"),
           br(),
           # effect function g1 (difference to group X=0)
-          fluidRow(column(1, p("+ (")),
-                   column(2, p("\u03B3\u2081\u2080\u2080")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2081*Xi\u2081")),
-                   column(1, p("+")),
-                   column(2, p("\u03B3\u2081\u2080\u2082*Xi\u2082")),
-                   column(1, p(")*X"))),
+          fluidRow(column(1, div('$$+ ($$')),
+                   column(2, div('$$\\gamma_{100}$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{101}\\xi_1$$')),
+                   column(1, div('$$+$$')),
+                   column(2, div('$$\\gamma_{102}\\xi_2$$')),
+                   column(1, div('$$)*X$$'))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="gamma100", label=NULL, value=v$v_gamma100, width='100%')),
                    column(1),
@@ -312,10 +310,10 @@ shinyServer(
           tags$hr(style="border-color: purple;"),
           br(),
           # residual
-          fluidRow(column(1, p("+ (")),
-                   column(2, p("Mean(\u03B6), ")),
-                   column(2, p(", SD(\u03B6)")),
-                   column(1, p(")"))),
+          fluidRow(column(1, div('$$+ ($$')),
+                   column(2, div('$$Mean(\\zeta), $$')),
+                   column(2, div('$$SD(\\zeta)$$')),
+                   column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, numericInput(inputId="mean_ceta", label=NULL, value=0, width='100%')),
                    column(2, numericInput(inputId="sd_ceta", label=NULL, value=v$v_sd_ceta, width='100%')))
@@ -389,7 +387,10 @@ shinyServer(
          lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "11"), value=0.3))
          # set covariance to 0
          v$v_cov_z1_xi1 <- 0
-
+         ########## conditional treatment probability
+         v$v_alpha0 <- 0
+         v$v_alpha1 <- 1
+         v$v_alpha2 <- 1
          ######## regression
          # BE AWARE: coefficients of manifest covariates first and then of latent covariates
          # adapt coefficients of baseline function g0
@@ -435,7 +436,11 @@ shinyServer(
          lapply(1:3, function(i) updateNumericInput(session, inputId=paste0("sd_e", i, "11"), value=0.3))
          # set covariance to 0
          v$v_cov_z1_xi1 <- 0
-
+         
+         ########## conditional treatment probability
+         v$v_alpha0 <- 0
+         v$v_alpha1 <- 1
+         v$v_alpha2 <- 1
         ######## regression
         # BE AWARE: coefficients of manifest covariates first and then of latent covariates
         # adapt coefficients of baseline function g0
@@ -479,7 +484,10 @@ shinyServer(
                                                                             value=l[i]))
         # set covariance to 0.5
          v$v_cov_xi1_xi2 <- 0.5
-
+         ########## conditional treatment probability
+         v$v_alpha0 <- 0
+         v$v_alpha1 <- 0.4
+         v$v_alpha2 <- 0.6
         ######## regression
         # BE AWARE: coefficients of manifest covariates first and then of latent covariates
         # adapt coefficients of baseline function g0
@@ -500,23 +508,32 @@ shinyServer(
     # data generation
     
     N <- reactive(input$N)
+    link <- reactive(input$link)
 
     ### Simulation of normally distributed independent continuous variables
      #!# problem: please create nicer error message for semidefiniteness
     df1 <- reactive({
       if(n_m_cov()==0 & n_l_cov()==2){
-      # means
-      mean_xi1 <- reactive(input$mean_xi1)
-      mean_xi2 <- reactive(input$mean_xi2)
-      # compute variances
-      var_xi1 <- reactive(input$sd_xi1^2)
-      var_xi2 <- reactive(input$sd_xi2^2)
-      # get covariances
-      cov_xi1_xi2 <- reactive(input$cov_xi1_xi2)
-      # create dataframe
-      setNames(data.frame(mvrnorm(n=N(), mu=c(mean_xi1(), mean_xi2()),
-              Sigma=matrix(c(var_xi1(), cov_xi1_xi2(), cov_xi1_xi2(), var_xi2()), nrow=2), empirical=TRUE)),
-              c("Xi1", "Xi2"))
+        # means
+        mean_xi1 <- reactive(input$mean_xi1)
+        mean_xi2 <- reactive(input$mean_xi2)
+        # compute variances
+        var_xi1 <- reactive(input$sd_xi1^2)
+        var_xi2 <- reactive(input$sd_xi2^2)
+        # get covariances
+        cov_xi1_xi2 <- reactive(input$cov_xi1_xi2)
+        # create dataframe
+        df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_xi1(), mean_xi2()),
+                Sigma=matrix(c(var_xi1(), cov_xi1_xi2(), cov_xi1_xi2(), var_xi2()), nrow=2), empirical=TRUE)),
+                c("Xi1", "Xi2"))
+        logit <- input$alpha0 + input$alpha1*df$Xi1 + input$alpha2*df$Xi2
+        df$PrX <- exp(logit)/(1+exp(logit))
+        if(link()=="probit"){
+          df$X <- rbinom(N(), 1, rnorm(logit))
+        }else if(link()=="logit"){
+          df$X <- rbinom(N(), 1, df$PrX)
+        }
+        return(df)
 
     }else if(n_m_cov()==1 & n_l_cov()==1){
       # means
@@ -528,9 +545,20 @@ shinyServer(
       # get covariances
       cov_z1_xi1 <- reactive(input$cov_z1_xi1)
       # create dataframe
-      setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_xi1()),
+      df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_xi1()),
               Sigma=matrix(c(var_z1(), cov_z1_xi1(), cov_z1_xi1(), var_xi1()), nrow=2), empirical=TRUE)),
               c("Z1", "Xi1"))
+      a <- reactive(input$alpha0)
+      print(a())
+      df$logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Xi2
+      print(head(df))
+      # df$PrX <- exp(logit)/(1+exp(logit))
+      # if(link()=="probit"){
+      #   df$X <- rbinom(N(), 1, rnorm(logit))
+      # }else if(link()=="logit"){
+      #   df$X <- rbinom(N(), 1, df$PrX)
+      # }
+      # return(df)
 
 
     }else if(n_m_cov()==1 & n_l_cov()==2){
@@ -547,11 +575,19 @@ shinyServer(
       cov_z1_xi2 <- reactive(input$cov_z1_xi2)
       cov_xi1_xi2 <- reactive(input$cov_xi1_xi2)
       # create dataframe
-      setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_xi1(), mean_xi2()),
+      df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_xi1(), mean_xi2()),
               Sigma=matrix(c(var_z1(), cov_z1_xi1(), cov_z1_xi2(),
                              cov_z1_xi1(), var_xi1(), cov_xi1_xi2(),
                              cov_z1_xi2(), cov_xi1_xi2(), var_xi2()), nrow=3), empirical=TRUE)),
               c("Z1", "Xi1", "Xi2"))
+      logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Xi1 + input$alpha3*df$Xi2
+      df$PrX <- exp(logit)/(1+exp(logit))
+      if(link()=="probit"){
+        df$X <- rbinom(N(), 1, rnorm(logit))
+      }else if(link()=="logit"){
+        df$X <- rbinom(N(), 1, df$PrX)
+      }
+      return(df)
 
     }else if(n_m_cov()==2 & n_l_cov()==1){
       # means
@@ -567,11 +603,19 @@ shinyServer(
       cov_z1_xi1 <- reactive(input$cov_z1_xi1)
       cov_z2_xi1 <- reactive(input$cov_z2_xi1)
       # create dataframe
-      setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_z2(), mean_xi1()),
+      df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_z2(), mean_xi1()),
               Sigma=matrix(c(var_z1(), cov_z1_z2(), cov_z1_xi1(),
                              cov_z1_z2(), var_z2(), cov_z2_xi1(),
                              cov_z1_xi1(), cov_z2_xi1(), var_xi1()), nrow=3), empirical=TRUE)),
               c("Z1", "Z2", "Xi1"))
+      logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Z2 + input$alpha3*df$Xi1
+      df$PrX <- exp(logit)/(1+exp(logit))
+      if(link()=="probit"){
+        df$X <- rbinom(N(), 1, rnorm(logit))
+      }else if(link()=="logit"){
+        df$X <- rbinom(N(), 1, df$PrX)
+      }
+      return(df)
 
     }else if(n_m_cov()==2 & n_l_cov()==2){
       # means
@@ -592,12 +636,21 @@ shinyServer(
       cov_z2_xi2 <- reactive(input$cov_z2_xi2)
       cov_xi1_xi2 <- reactive(input$cov_xi1_xi2)
       # create dataframe
-      setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_z2(), mean_xi1(), mean_xi2()),
+      df <- setNames(data.frame(mvrnorm(n=N(), mu=c(mean_z1(), mean_z2(), mean_xi1(), mean_xi2()),
               Sigma=matrix(c(var_z1(), cov_z1_z2(), cov_z1_xi1(), cov_z1_xi2(),
                              cov_z1_z2(), var_z2(), cov_z2_xi1(), cov_z2_xi2(),
                              cov_z1_xi1(), cov_z2_xi1(), var_xi1(), cov_xi1_xi2(),
                              cov_z1_xi2(), cov_z2_xi2(), cov_xi1_xi2(), var_xi2()), nrow=4), empirical=TRUE)),
               c("Z1", "Z2", "Xi1", "Xi2"))
+      # simulate X
+      logit <- input$alpha0 + input$alpha1*df$Z1 + input$alpha2*df$Z2 + input$alpha3*df$Xi1 + input$alpha4*df$Xi2
+      df$PrX <- exp(logit)/(1+exp(logit))
+      if(link()=="probit"){
+        df$X <- rbinom(N(), 1, rnorm(logit))
+      }else if(link()=="logit"){
+        df$X <- rbinom(N(), 1, df$PrX)
+      }
+      return(df)
       }
     })
 
@@ -615,7 +668,7 @@ shinyServer(
           df1a$Y212 <- input$loading_Y212*df1a$Xi2 + rnorm(N(), 0, input$sd_e212)
           df1a$Y312 <- input$loading_Y312*df1a$Xi2 + rnorm(N(), 0, input$sd_e312)
         }
-        #df1a$PrX <- exp(0.0 + .4*Xi1 + 0.6*Xi2) / (1 + exp(0.0 + 0.4*Xi1 + 0.6*Xi2))
+        
 
         return(df1a)
       })
@@ -639,10 +692,13 @@ shinyServer(
     
     
     
-    output$t <- renderTable(
+    output$t <- renderTable({
       head(data())
-    )
-    
+    })
+    output$text <- renderPrint({
+      input$alpha1
+
+    })
     
     
   }
