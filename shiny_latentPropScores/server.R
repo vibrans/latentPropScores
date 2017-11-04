@@ -694,12 +694,59 @@ shinyServer(
     
     
     ################################# proved EffectLiteR approach ############################################
-    
-    
+    mm <- reactive({
+      if(n_m_cov()==1 & n_l_cov()==1){
+        names <- c("Xi1")
+      }
+    })
+      mm <- '
+        xi =~ c(1,1)*y11 + c(la2,la2)*y21 + c(la3,la3)*y31
+        xi ~ NA*1
+        y11 ~ c(0,0)*1
+        y21 ~ c(nu2,nu2)*1
+        y31 ~ c(nu3,nu3)*1
+        '
+      
+      #m3 <- EffectLiteR::effectLite(y="Y", x="X", z="probit", measurement=mm, data=d, 
+                       #interactions="none", fixed.cell=TRUE) 
     
     ################################# new latent Propensity Score approach ###################################
     ## using lavaan to estimate treatment effect with latent PSs
-
+    ##### Full multigroup model specification with stochsatic predictors and group sizes #####
+      
+    mm <- '
+      xi =~ c(1,1)*y11 + c(la2,la2)*y21 + c(la3,la3)*y31
+      xi ~ c(mxi0,mxi1)*1
+      z ~ c(mz0,mz1)*1
+      
+      y11 ~ c(0,0)*1
+      y21 ~ c(nu2,nu2)*1
+      y31 ~ c(nu3,nu3)*1
+      
+      probit <~ 0.6018074*xi + 0.5960086*z
+      probit ~ -0.0137318*1
+      xi ~~ 0*probit
+      
+      y ~ c(a01,a11)*probit ## with interaction
+      y ~ c(a00,a10)*1
+      
+      group % c(gw0,gw1)*w
+      N := exp(gw0) + exp(gw1)
+      relfreq0 := exp(gw0)/N
+      relfreq1 := exp(gw1)/N
+      
+      mprobit0 := -0.0137318 + 0.6018074*mxi0 + 0.5960086*mz0
+      mprobit1 := -0.0137318 + 0.6018074*mxi1 + 0.5960086*mz1
+      mprobit := mprobit0*relfreq0 + mprobit1*relfreq1
+      
+      g10 := a10 - a00
+      g11 := a11 - a01
+      
+      ave := g10 + g11*mprobit  ## average effect
+      '
+      
+      #m5 <- sem(mm, data=d, group="x", group.label=c("0","1"))
+      #summary(m5)
     
     
     
