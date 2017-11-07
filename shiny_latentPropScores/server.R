@@ -517,6 +517,7 @@ shinyServer(
     ### Simulation of normally distributed independent continuous variables
      #!# problem: please create nicer error message for semidefiniteness
     df1 <- reactive({
+      set.seed(746)
       if(n_m_cov()==1 & n_l_cov()==1){
         # means
         mean_z1 <- input$mean_z1
@@ -672,6 +673,7 @@ shinyServer(
 
 
     ########## indicator variables for latent covariates
+    # itj ... index of indicator, timepoint, index of latent variable (1 if Xi1...)
       data <- reactive({
         if(n_l_cov()>0){
           df1a <- df1()
@@ -684,66 +686,123 @@ shinyServer(
           df1a$Y212 <- input$intercept_Y212 + input$loading_Y212*df1a$Xi2 + rnorm(N(), 0, input$sd_e212)
           df1a$Y312 <- input$intercept_Y312 + input$loading_Y312*df1a$Xi2 + rnorm(N(), 0, input$sd_e312)
         }
-        
+        # indicator variables for dependent latent variable
+        #!# problem: simulation might be wrong, because Y is used and 'made' latent -> maybe one should use
+        # Y without the errorterm zeta
+        if(input$dv=='latentDV'){
+          df1a$Y121 <- input$intercept_Y121 + input$loading_Y121*df1a$Y + rnorm(N(), 0, input$sd_e121)
+          df1a$Y221 <- input$intercept_Y221 + input$loading_Y221*df1a$Y + rnorm(N(), 0, input$sd_e221)
+          df1a$Y321 <- input$intercept_Y321 + input$loading_Y321*df1a$Y + rnorm(N(), 0, input$sd_e321)
+        }
         return(df1a)
       })
       
 
-
+    ### useful function for eta
+      EtaExists <- reactive({
+        if(input$dv=="manifestDV"){
+          return(list(expression(NULL), "Y", NULL, NULL))
+        }else{
+          return(list(expression("Eta"), "Eta", expression("Eta"=c("Y121", "Y221", "Y321")), "tau-cong"))
+        }
+      }
+      )
     ############################################ Raykov's idea ###############################################
     
     
     ################################# proved EffectLiteR approach ############################################
-    mm <- reactive({
+    res_mm <- reactive({
       if(n_m_cov()==1 & n_l_cov()==1){
-        names <- c("Xi1")
+        names <- c("xi1", eval(EtaExists()[[1]]))
+        indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
+                           eval(EtaExists()[[3]])))
+        ncells = 2
+        model = c("tau-cong", EtaExists()[[4]])
+        mm <- EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+        #!# Xi1 already in dataframe but seems to work with using Xi1 from measurement model and not from dataframe
+        # still as precaution rather take different names xi1 xi2 :-(
+        fit <- EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "xi1"), data=data(), measurement=mm)
+        
+      }else if(n_m_cov()==1 & n_l_cov()==2){
+        names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
+        indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
+                                                   "xi2" = c("Y112", "Y212", "Y312"),
+                                                   eval(EtaExists()[[3]])))
+        ncells = 2
+        model = c("tau-cong", EtaExists()[[4]])
+        mm <- EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+        fit <- EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "xi1", "xi2"), data=data(), measurement=mm)
+        print(fit)
+        
+      }else if(n_m_cov()==2 & n_l_cov()==2){
+        names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
+        indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
+                                                   "xi2" = c("Y112", "Y212", "Y312"),
+                                                   eval(EtaExists()[[3]])))
+        ncells = 2
+        model = c("tau-cong", EtaExists()[[4]])
+        mm <- EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+        fit <- EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "Z2", "xi1", "xi2"), data=data(), measurement=mm)
+        print(fit)
+        
+      }else if(n_m_cov()==2 & n_l_cov()==1){
+        names <- c("xi1", eval(EtaExists()[[1]]))
+        indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
+                                                   eval(EtaExists()[[3]])))
+        ncells = 2
+        model = c("tau-cong", EtaExists()[[4]])
+        mm <- EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+        fit <- EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "Z2", "xi1"), data=data(), measurement=mm)
+        print(fit)
+        
+      }else if(n_m_cov()==0 & n_l_cov()==2){
+        names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
+        indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
+                                                   "xi2" = c("Y112", "Y212", "Y312"),
+                                                   eval(EtaExists()[[3]])))
+        ncells = 2
+        model = c("tau-cong", EtaExists()[[4]])
+        mm <- EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+        fit <- EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("xi1", "xi2"), data=data(), measurement=mm)
+        print(fit)
       }
     })
-      mm <- '
-        xi =~ c(1,1)*y11 + c(la2,la2)*y21 + c(la3,la3)*y31
-        xi ~ NA*1
-        y11 ~ c(0,0)*1
-        y21 ~ c(nu2,nu2)*1
-        y31 ~ c(nu3,nu3)*1
-        '
       
-      #m3 <- EffectLiteR::effectLite(y="Y", x="X", z="probit", measurement=mm, data=d, 
-                       #interactions="none", fixed.cell=TRUE) 
     
     ################################# new latent Propensity Score approach ###################################
     ## using lavaan to estimate treatment effect with latent PSs
     ##### Full multigroup model specification with stochsatic predictors and group sizes #####
-      
-    mm <- '
-      xi =~ c(1,1)*y11 + c(la2,la2)*y21 + c(la3,la3)*y31
-      xi ~ c(mxi0,mxi1)*1
-      z ~ c(mz0,mz1)*1
-      
-      y11 ~ c(0,0)*1
-      y21 ~ c(nu2,nu2)*1
-      y31 ~ c(nu3,nu3)*1
-      
-      probit <~ 0.6018074*xi + 0.5960086*z
-      probit ~ -0.0137318*1
-      xi ~~ 0*probit
-      
-      y ~ c(a01,a11)*probit ## with interaction
-      y ~ c(a00,a10)*1
-      
-      group % c(gw0,gw1)*w
-      N := exp(gw0) + exp(gw1)
-      relfreq0 := exp(gw0)/N
-      relfreq1 := exp(gw1)/N
-      
-      mprobit0 := -0.0137318 + 0.6018074*mxi0 + 0.5960086*mz0
-      mprobit1 := -0.0137318 + 0.6018074*mxi1 + 0.5960086*mz1
-      mprobit := mprobit0*relfreq0 + mprobit1*relfreq1
-      
-      g10 := a10 - a00
-      g11 := a11 - a01
-      
-      ave := g10 + g11*mprobit  ## average effect
-      '
+    #   
+    # mm <- '
+    #   xi =~ c(1,1)*y11 + c(la2,la2)*y21 + c(la3,la3)*y31
+    #   xi ~ c(mxi0,mxi1)*1
+    #   z ~ c(mz0,mz1)*1
+    #   
+    #   y11 ~ c(0,0)*1
+    #   y21 ~ c(nu2,nu2)*1
+    #   y31 ~ c(nu3,nu3)*1
+    #   
+    #   probit <~ 0.6018074*xi + 0.5960086*z
+    #   probit ~ -0.0137318*1
+    #   xi ~~ 0*probit
+    #   
+    #   y ~ c(a01,a11)*probit ## with interaction
+    #   y ~ c(a00,a10)*1
+    #   
+    #   group % c(gw0,gw1)*w
+    #   N := exp(gw0) + exp(gw1)
+    #   relfreq0 := exp(gw0)/N
+    #   relfreq1 := exp(gw1)/N
+    #   
+    #   mprobit0 := -0.0137318 + 0.6018074*mxi0 + 0.5960086*mz0
+    #   mprobit1 := -0.0137318 + 0.6018074*mxi1 + 0.5960086*mz1
+    #   mprobit := mprobit0*relfreq0 + mprobit1*relfreq1
+    #   
+    #   g10 := a10 - a00
+    #   g11 := a11 - a01
+    #   
+    #   ave := g10 + g11*mprobit  ## average effect
+    #   '
       
       #m5 <- sem(mm, data=d, group="x", group.label=c("0","1"))
       #summary(m5)
@@ -754,11 +813,23 @@ shinyServer(
     
     
     
-    output$t <- renderTable({
-      head(data())
-    })
+    # output$t <- renderTable({
+    #   head(data())
+    #   res <- res_mm()
+    #   summary(res@results@lavresults)
+    #   #res_mm()
+    # })
+      
+      
     output$text <- renderPrint({
-      input$alpha1
+      res <- res_mm()
+      #summary(res@results@lavresults, fit.measures=TRUE)
+      #print(res)
+      res@results@Egx
+      cat(res@syntax@model)
+      #summary(fit@results@lavresults)
+      
+
 
     })
     

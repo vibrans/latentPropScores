@@ -190,9 +190,9 @@ shinyUI(fluidPage(
        ############# dependent variable ##########
        tabPanel('Abhängige Variable',
                 radioButtons(inputId="dv", label="Soll die abängige Variable manifest oder latent sein?",
-                             choices=c("manifest (Y)"="Y", "latent (Eta)"="eta")),
+                             choices=c("manifest (Y)"="manifestDV", "latent (Eta)"="latentDV")),
                 conditionalPanel(
-                  condition = "input.dv == 'eta'",
+                  condition = "input.dv == 'latentDV'",
                   # indicators
                   h3(strong("Y\u2081\u2082\u2081 =")),
                   fluidRow(column(2, withMathJax("$$\\nu_{121}$$")),
@@ -272,12 +272,13 @@ shinyUI(fluidPage(
       tabsetPanel(
         tabPanel('Raykov-Methode',
                  tableOutput("t")),
-        tabPanel('Effect-Lite-R-Methode'),
+        tabPanel('Effect-Lite-R-Methode',
+                 verbatimTextOutput("text")),
         tabPanel('neue latente PS-Methode')
-      ),
+      )
       
       #uiOutput("ahhh")
-      textOutput("text")
+      
     )
   )
 )
