@@ -821,7 +821,7 @@ shinyServer(
     # })
       
       
-    output$text <- renderPrint({
+    output$effectLiteApproach <- renderPrint({
       res <- res_mm()
       #summary(res@results@lavresults, fit.measures=TRUE)
       #print(res)
