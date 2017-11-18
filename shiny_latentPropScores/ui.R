@@ -1,5 +1,6 @@
 library(shiny)
 library(MASS)
+library(EffectLiteR) # loads lavaan automatically
 # Estimating Causal Effects by Adjusting for Propensity Scores computed from Latent Variables
 
 shinyUI(fluidPage(

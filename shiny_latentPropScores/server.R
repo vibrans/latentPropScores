@@ -707,71 +707,90 @@ shinyServer(
         }
       }
       )
+      
+    ### measurement model
+      mm <- reactive({
+        if(n_m_cov()==1 & n_l_cov()==1){
+          names <- c("xi1", eval(EtaExists()[[1]]))
+          indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
+                                                     eval(EtaExists()[[3]])))
+          ncells = 2
+          model = c("tau-cong", EtaExists()[[4]])
+          EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+          
+        }else if(n_m_cov()==1 & n_l_cov()==2){
+          names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
+          indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
+                                                     "xi2" = c("Y112", "Y212", "Y312"),
+                                                     eval(EtaExists()[[3]])))
+          ncells = 2
+          model = c("tau-cong", EtaExists()[[4]])
+          EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+
+          
+        }else if(n_m_cov()==2 & n_l_cov()==2){
+          names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
+          indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
+                                                     "xi2" = c("Y112", "Y212", "Y312"),
+                                                     eval(EtaExists()[[3]])))
+          ncells = 2
+          model = c("tau-cong", EtaExists()[[4]])
+          EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+
+        }else if(n_m_cov()==2 & n_l_cov()==1){
+          names <- c("xi1", eval(EtaExists()[[1]]))
+          indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
+                                                     eval(EtaExists()[[3]])))
+          ncells = 2
+          model = c("tau-cong", EtaExists()[[4]])
+          EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+
+        }else if(n_m_cov()==0 & n_l_cov()==2){
+          names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
+          indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
+                                                     "xi2" = c("Y112", "Y212", "Y312"),
+                                                     eval(EtaExists()[[3]])))
+          ncells = 2
+          model = c("tau-cong", EtaExists()[[4]])
+          EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+        }
+      })
     ############################################ Raykov's idea ###############################################
-    
-    
+      ## 1: estimating factor scores
+      # fit_mm <- reactive({
+      #   lavaan(model=mm(), data=data())
+      # })
+      # 
+      # est_factor_scores <- reactive(
+      #   lavPredict(fit_mm())
+      # )
+
+      ## 2: calculate modified PS (MPS): P(X=1|^Xi1, ..., Z1, ...)
+      #m1_MPS <- glm(X ~ estXi1+estXi2, family=binomial(link='logit'), data=data()) # without IA
+
+      #summary(m1_MPS)
     ################################# proved EffectLiteR approach ############################################
-    res_mm <- reactive({
+    fit_sem_effectLite <- reactive({
       if(n_m_cov()==1 & n_l_cov()==1){
-        names <- c("xi1", eval(EtaExists()[[1]]))
-        indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
-                           eval(EtaExists()[[3]])))
-        ncells = 2
-        model = c("tau-cong", EtaExists()[[4]])
-        mm <- EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
-        #!# Xi1 already in dataframe but seems to work with using Xi1 from measurement model and not from dataframe
-        # still as precaution rather take different names xi1 xi2 :-(
-        fit <- EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "xi1"), data=data(), measurement=mm)
+        EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "xi1"), data=data(), measurement=mm())
         
       }else if(n_m_cov()==1 & n_l_cov()==2){
-        names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
-        indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
-                                                   "xi2" = c("Y112", "Y212", "Y312"),
-                                                   eval(EtaExists()[[3]])))
-        ncells = 2
-        model = c("tau-cong", EtaExists()[[4]])
-        mm <- EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
-        fit <- EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "xi1", "xi2"), data=data(), measurement=mm)
-        print(fit)
+        EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "xi1", "xi2"), data=data(), measurement=mm())
         
       }else if(n_m_cov()==2 & n_l_cov()==2){
-        names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
-        indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
-                                                   "xi2" = c("Y112", "Y212", "Y312"),
-                                                   eval(EtaExists()[[3]])))
-        ncells = 2
-        model = c("tau-cong", EtaExists()[[4]])
-        mm <- EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
-        fit <- EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "Z2", "xi1", "xi2"), data=data(), measurement=mm)
-        print(fit)
+        EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "Z2", "xi1", "xi2"), data=data(), measurement=mm())
         
       }else if(n_m_cov()==2 & n_l_cov()==1){
-        names <- c("xi1", eval(EtaExists()[[1]]))
-        indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
-                                                   eval(EtaExists()[[3]])))
-        ncells = 2
-        model = c("tau-cong", EtaExists()[[4]])
-        mm <- EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
-        fit <- EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "Z2", "xi1"), data=data(), measurement=mm)
-        print(fit)
+        EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("Z1", "Z2", "xi1"), data=data(), measurement=mm())
         
       }else if(n_m_cov()==0 & n_l_cov()==2){
-        names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
-        indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
-                                                   "xi2" = c("Y112", "Y212", "Y312"),
-                                                   eval(EtaExists()[[3]])))
-        ncells = 2
-        model = c("tau-cong", EtaExists()[[4]])
-        mm <- EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
-        fit <- EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("xi1", "xi2"), data=data(), measurement=mm)
-        print(fit)
+        EffectLiteR::effectLite(y=EtaExists()[[2]], x="X", z=c("xi1", "xi2"), data=data(), measurement=mm())
       }
     })
-      
     
     ################################# new latent Propensity Score approach ###################################
     ## using lavaan to estimate treatment effect with latent PSs
-    ##### Full multigroup model specification with stochsatic predictors and group sizes #####
+    ##### Full multigroup model specification with stochastic predictors and group sizes #####
     #   
     # mm <- '
     #   xi =~ c(1,1)*y11 + c(la2,la2)*y21 + c(la3,la3)*y31
@@ -813,16 +832,13 @@ shinyServer(
     
     
     
-    # output$t <- renderTable({
-    #   head(data())
-    #   res <- res_mm()
-    #   summary(res@results@lavresults)
-    #   #res_mm()
-    # })
+    output$t <- renderTable({
+      mm()
+    })
       
       
     output$effectLiteApproach <- renderPrint({
-      res <- res_mm()
+      res <- fit_sem_effectLite()
       #summary(res@results@lavresults, fit.measures=TRUE)
       #print(res)
       res@results@Egx
@@ -832,6 +848,10 @@ shinyServer(
 
 
     })
+      
+    # output$est <- renderTable({
+    #   est_factor_scores()
+    # })
     
     
   }
