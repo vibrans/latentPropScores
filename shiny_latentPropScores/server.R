@@ -699,62 +699,66 @@ shinyServer(
       
 
     ### useful function for eta
+      # EtaExists <- reactive({
+      #   if(input$dv=="manifestDV"){
+      #     return(list(expression(NULL), "Y", NULL, NULL))
+      #   }else{
+      #     return(list(expression("Eta"), "Eta", expression("Eta"=c("Y121", "Y221", "Y321")), "tau-cong"))
+      #   }
+      # }
+      # )
       EtaExists <- reactive({
         if(input$dv=="manifestDV"){
-          return(list(expression(NULL), "Y", NULL, NULL))
+          return(list(NULL, "Y"))
         }else{
-          return(list(expression("Eta"), "Eta", expression("Eta"=c("Y121", "Y221", "Y321")), "tau-cong"))
-        }
-      }
-      )
-      
-    ### measurement model
-      mm <- reactive({
-        if(n_m_cov()==1 & n_l_cov()==1){
-          names <- c("xi1", eval(EtaExists()[[1]]))
-          indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
-                                                     eval(EtaExists()[[3]])))
-          ncells = 2
-          model = c("tau-cong", EtaExists()[[4]])
-          EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
-          
-        }else if(n_m_cov()==1 & n_l_cov()==2){
-          names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
-          indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
-                                                     "xi2" = c("Y112", "Y212", "Y312"),
-                                                     eval(EtaExists()[[3]])))
-          ncells = 2
-          model = c("tau-cong", EtaExists()[[4]])
-          EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
-
-          
-        }else if(n_m_cov()==2 & n_l_cov()==2){
-          names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
-          indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
-                                                     "xi2" = c("Y112", "Y212", "Y312"),
-                                                     eval(EtaExists()[[3]])))
-          ncells = 2
-          model = c("tau-cong", EtaExists()[[4]])
-          EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
-
-        }else if(n_m_cov()==2 & n_l_cov()==1){
-          names <- c("xi1", eval(EtaExists()[[1]]))
-          indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
-                                                     eval(EtaExists()[[3]])))
-          ncells = 2
-          model = c("tau-cong", EtaExists()[[4]])
-          EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
-
-        }else if(n_m_cov()==0 & n_l_cov()==2){
-          names <- c("xi1", "xi2", eval(EtaExists()[[1]]))
-          indicators <- Filter(Negate(is.null), list("xi1" = c("Y111", "Y211", "Y311"), # NULLs in list must be filtered out
-                                                     "xi2" = c("Y112", "Y212", "Y312"),
-                                                     eval(EtaExists()[[3]])))
-          ncells = 2
-          model = c("tau-cong", EtaExists()[[4]])
-          EffectLiteR::generateMeasurementModel(names, indicators, ncells, model=model)
+          mEta <- 'Eta =~ c(1,1)*Y121 + Y221 + Y321
+                    Eta ~ NA*1
+                  Y121 ~ c(0,0)*1
+                  Y221 ~ c(nu221,nu221)*1
+                  Y321 ~ c(nu321,nu321)*1'
+          return(list(mEta, "Eta"))
         }
       })
+      
+    ### measurement model
+      # small xi and eta in case effectLiteR function takes the capital ones from dataframe
+      mm <- reactive({
+        if(n_l_cov()==1){
+          m <- 'Xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
+                Xi1 ~ NA*1
+                Y111 ~ c(0,0)*1
+                Y211 ~ c(nu211,nu211)*1
+                Y311 ~ c(nu311,nu311)*1
+              '
+          m <- paste(m, EtaExists()[1], sep="\n ")
+          
+        }else if(n_l_cov()==2){
+          m <- 'Xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
+                Xi2 =~ c(1,1)*Y112 + c(la212,la212)*Y212 + c(la312,la312)*Y312
+                Xi1 ~ NA*1
+                Xi2 ~ NA*1
+          Y111 ~ c(0,0)*1
+          Y211 ~ c(nu211,nu211)*1
+          Y311 ~ c(nu311,nu311)*1
+
+          Y112 ~ c(0,0)*1
+          Y212 ~ c(nu212,nu212)*1
+          Y312 ~ c(nu312,nu312)*1
+          '
+          m <- paste(m, EtaExists()[1], sep="\n ")
+        }
+        })
+
+      #   }else if(n_m_cov()==2 & n_l_cov()==2){
+      # 
+      # 
+      #   }else if(n_m_cov()==2 & n_l_cov()==1){
+      # 
+      # 
+      #   }else if(n_m_cov()==0 & n_l_cov()==2){
+      # 
+      #   }
+      # })
     ############################################ Raykov's idea ###############################################
       ## 1: estimating factor scores
       # fit_mm <- reactive({
@@ -832,8 +836,8 @@ shinyServer(
     
     
     
-    output$t <- renderTable({
-      mm()
+    output$t <- renderPrint({
+      cat(mm())
     })
       
       
