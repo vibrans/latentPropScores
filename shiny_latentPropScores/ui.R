@@ -269,12 +269,14 @@ shinyUI(fluidPage(
        )
       )
     ),
+    #########################################################################################################
     mainPanel(
       tabsetPanel(
         tabPanel('Raykov-Methode',
-                 verbatimTextOutput("t")),
-        tabPanel('Effect-Lite-R-Methode',
-                 verbatimTextOutput("effectLiteApproach")),
+                 #verbatimTextOutput("t")),
+                 tableOutput("est")),
+        tabPanel('Effect-Lite-R-Methode'),
+                 #verbatimTextOutput("effectLiteApproach")),
         tabPanel('neue latente PS-Methode'),
         tabPanel('Vergleich')
       )

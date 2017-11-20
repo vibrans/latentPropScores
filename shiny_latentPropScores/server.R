@@ -721,22 +721,22 @@ shinyServer(
       })
       
     ### measurement model
-      # small xi and eta in case effectLiteR function takes the capital ones from dataframe
+      # small xi in case effectLiteR function takes the capital ones from dataframe
       mm <- reactive({
         if(n_l_cov()==1){
-          m <- 'Xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
-                Xi1 ~ NA*1
+          m <- 'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
+                xi1 ~ NA*1
                 Y111 ~ c(0,0)*1
                 Y211 ~ c(nu211,nu211)*1
                 Y311 ~ c(nu311,nu311)*1
               '
-          m <- paste(m, EtaExists()[1], sep="\n ")
+          #m <- paste(m, EtaExists()[[1]], sep="\n ")
           
         }else if(n_l_cov()==2){
-          m <- 'Xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
-                Xi2 =~ c(1,1)*Y112 + c(la212,la212)*Y212 + c(la312,la312)*Y312
-                Xi1 ~ NA*1
-                Xi2 ~ NA*1
+          m <- 'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
+                xi2 =~ c(1,1)*Y112 + c(la212,la212)*Y212 + c(la312,la312)*Y312
+                xi1 ~ NA*1
+                xi2 ~ NA*1
           Y111 ~ c(0,0)*1
           Y211 ~ c(nu211,nu211)*1
           Y311 ~ c(nu311,nu311)*1
@@ -745,7 +745,7 @@ shinyServer(
           Y212 ~ c(nu212,nu212)*1
           Y312 ~ c(nu312,nu312)*1
           '
-          m <- paste(m, EtaExists()[1], sep="\n ")
+          #m <- paste(m, EtaExists()[[1]], sep="\n ")
         }
         })
 
@@ -761,18 +761,42 @@ shinyServer(
       # })
     ############################################ Raykov's idea ###############################################
       ## 1: estimating factor scores
-      # fit_mm <- reactive({
-      #   lavaan(model=mm(), data=data())
-      # })
-      # 
-      # est_factor_scores <- reactive(
-      #   lavPredict(fit_mm())
-      # )
+      est_factor_scores <- reactive({
+        d <- data()
+        fit <- cfa(model=mm(), data=d, group="X")
+        estFactorScores <- do.call(rbind, lavPredict(fit))
+        if(n_l_cov()==1){
+          colnames(estFactorScores) <- c("estXi1")
+        }else{
+          colnames(estFactorScores) <- c("estXi1", "estXi2")
+        }
+        cbind(d, estFactorScores)
+      })
 
       ## 2: calculate modified PS (MPS): P(X=1|^Xi1, ..., Z1, ...)
-      #m1_MPS <- glm(X ~ estXi1+estXi2, family=binomial(link='logit'), data=data()) # without IA
+      MPS <- reactive({
+        d <- est_factor_scores()
+        indVars <- intersect(c("Z1", "Z2", "estXi1", "estXi2"), names(d))
+        # !#! problem: although order of variables of glm output tested automatic check would be better
+        fit_MPS <- glm(as.formula(paste("X ~", paste(indVars, collapse="+"))), family=binomial(link=input$link), 
+                       data=d)
+        pot <- eval(parse(text=paste("exp(", paste(coef(fit_MPS), c("1", paste("d", indVars, sep="$")), sep="*", collapse="+"), ")")))
+        d$MPS <- pot/(1+pot)
+      })
+      
+      # originally with lm function but in case of latent dv now regression estimated with lavaan
+      MPS_fit <- reactive({})
+        lm_oMPS <- lm(Y ~ X + estXi1 + estXi2 + oMPS, data=od)
+      
+      # if(input$dv=="manifestDV"){
+      #   
+      # }
+      
+      
+      # for latent dv with lavaan
+      #
 
-      #summary(m1_MPS)
+
     ################################# proved EffectLiteR approach ############################################
     fit_sem_effectLite <- reactive({
       if(n_m_cov()==1 & n_l_cov()==1){
@@ -836,26 +860,27 @@ shinyServer(
     
     
     
-    output$t <- renderPrint({
-      cat(mm())
-    })
-      
-      
-    output$effectLiteApproach <- renderPrint({
-      res <- fit_sem_effectLite()
-      #summary(res@results@lavresults, fit.measures=TRUE)
-      #print(res)
-      res@results@Egx
-      cat(res@syntax@model)
-      #summary(fit@results@lavresults)
-      
-
-
-    })
-      
-    # output$est <- renderTable({
-    #   est_factor_scores()
+    # output$t <- renderPrint({
+    #   MPS()
     # })
+      
+      
+    # output$effectLiteApproach <- renderPrint({
+    #   res <- fit_sem_effectLite()
+    #   #summary(res@results@lavresults, fit.measures=TRUE)
+    #   #print(res)
+    #   res@results@Egx
+    #   cat(res@syntax@model)
+    #   #summary(fit@results@lavresults)
+    #   
+
+
+   # })
+      
+    output$est <- renderTable({
+      head(est_factor_scores())
+      head(MPS())
+    })
     
     
   }
