@@ -709,14 +709,14 @@ shinyServer(
       # )
       EtaExists <- reactive({
         if(input$dv=="manifestDV"){
-          return(list(NULL, "Y"))
+          return(list(NULL, "Y "))
         }else{
           mEta <- 'Eta =~ c(1,1)*Y121 + Y221 + Y321
-                    Eta ~ NA*1
+                    #Eta ~ NA*1       duplicate model element
                   Y121 ~ c(0,0)*1
                   Y221 ~ c(nu221,nu221)*1
                   Y321 ~ c(nu321,nu321)*1'
-          return(list(mEta, "Eta"))
+          return(list(mEta, "Eta "))
         }
       })
       
@@ -724,7 +724,7 @@ shinyServer(
       # small xi in case effectLiteR function takes the capital ones from dataframe
       mm <- reactive({
         if(n_l_cov()==1){
-          m <- 'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
+          'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
                 xi1 ~ NA*1
                 Y111 ~ c(0,0)*1
                 Y211 ~ c(nu211,nu211)*1
@@ -733,7 +733,7 @@ shinyServer(
           #m <- paste(m, EtaExists()[[1]], sep="\n ")
           
         }else if(n_l_cov()==2){
-          m <- 'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
+          'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
                 xi2 =~ c(1,1)*Y112 + c(la212,la212)*Y212 + c(la312,la312)*Y312
                 xi1 ~ NA*1
                 xi2 ~ NA*1
@@ -748,21 +748,11 @@ shinyServer(
           #m <- paste(m, EtaExists()[[1]], sep="\n ")
         }
         })
-
-      #   }else if(n_m_cov()==2 & n_l_cov()==2){
-      # 
-      # 
-      #   }else if(n_m_cov()==2 & n_l_cov()==1){
-      # 
-      # 
-      #   }else if(n_m_cov()==0 & n_l_cov()==2){
-      # 
-      #   }
-      # })
     ############################################ Raykov's idea ###############################################
       ## 1: estimating factor scores
       est_factor_scores <- reactive({
         d <- data()
+        d <- d[order(d$X),]     # order data
         fit <- cfa(model=mm(), data=d, group="X")
         estFactorScores <- do.call(rbind, lavPredict(fit))
         if(n_l_cov()==1){
@@ -782,19 +772,137 @@ shinyServer(
                        data=d)
         pot <- eval(parse(text=paste("exp(", paste(coef(fit_MPS), c("1", paste("d", indVars, sep="$")), sep="*", collapse="+"), ")")))
         d$MPS <- pot/(1+pot)
+        return(d)
       })
       
-      # originally with lm function but in case of latent dv now regression estimated with lavaan
-      MPS_fit <- reactive({})
-        lm_oMPS <- lm(Y ~ X + estXi1 + estXi2 + oMPS, data=od)
-      
-      # if(input$dv=="manifestDV"){
-      #   
-      # }
-      
-      
-      # for latent dv with lavaan
-      #
+      # originally with lm function but for comparability at least parameterization should be similar
+      # apart from that in case of latent dv now regression estimated with lavaan
+      # why Raykov uses the estimated factor scores in addition to his estimated PS - I don't know why
+      fit_raykov <- reactive({
+        if(n_m_cov()==1 & n_l_cov()==1){
+          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*estXi1 + c(a03,a13)*MPS', '\n',
+              EtaExists()[[2]],'~ c(a00,a10)*1
+              Z1 ~ c(mZ1_0,mZ1_1)*1
+              estXi1 ~ c(mXi1_0,mXi1_1)*1
+              MPS ~ c(mMPS_0,mMPS_1)*1
+
+              group % c(gw0,gw1)*w
+              N := exp(gw0) + exp(gw1)
+              relfreq0 := exp(gw0)/N
+              relfreq1 := exp(gw1)/N
+              
+              mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
+              mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
+              mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+              
+              g10 := a10 - a00
+              g11 := a11 - a01
+              g12 := a12 - a02
+              g13 := a13 - a03
+              ave := g10 + g11*mZ1 + g12*mXi1 + g13*mMPS
+          ', '\n', EtaExists()[[1]])
+        }else if(n_m_cov()==1 & n_l_cov()==2){
+          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*estXi1 + c(a03,a13)*estXi2 + c(a04,a14)*MPS', '\n',
+              EtaExists()[[2]],' ~ c(a00,a10)*1
+              Z1 ~ c(mZ1_0,mZ1_1)*1
+              estXi1 ~ c(mXi1_0,mXi1_1)*1
+              estXi2 ~ c(mXi2_0,mXi2_1)*1
+              MPS ~ c(mMPS_0,mMPS_1)*1
+
+              group % c(gw0,gw1)*w
+              N := exp(gw0) + exp(gw1)
+              relfreq0 := exp(gw0)/N
+              relfreq1 := exp(gw1)/N
+              
+              mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
+              mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
+              mXi2 := mXi2_0*relfreq0 + mXi2_1*relfreq1
+              mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+              
+              g10 := a10 - a00
+              g11 := a11 - a01
+              g12 := a12 - a02
+              g13 := a13 - a03
+              g14 := a14 - a04
+              ave := g10 + g11*mZ1 + g12*mXi1 + g13*mXi2 + g14*mMPS
+          ', '\n', EtaExists()[[1]])
+        }else if(n_m_cov()==2 & n_l_cov()==2){
+          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*Z2 + c(a03,a13)*estXi1 + c(a04,a14)*estXi2 + c(a05,a15)*MPS', '\n',
+              EtaExists()[[2]],'~ c(a00,a10)*1
+              Z1 ~ c(mZ1_0,mZ1_1)*1
+              Z2 ~ c(mZ2_0,mZ2_1)*1
+              estXi1 ~ c(mXi1_0,mXi1_1)*1
+              estXi2 ~ c(mXi2_0,mXi2_1)*1
+              MPS ~ c(mMPS_0,mMPS_1)*1
+
+              group % c(gw0,gw1)*w
+              N := exp(gw0) + exp(gw1)
+              relfreq0 := exp(gw0)/N
+              relfreq1 := exp(gw1)/N
+              
+              mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
+              mZ2 := mZ2_0*relfreq0 + mZ2_1*relfreq1
+              mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
+              mXi2 := mXi2_0*relfreq0 + mXi2_1*relfreq1
+              mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+              
+              g10 := a10 - a00
+              g11 := a11 - a01
+              g12 := a12 - a02
+              g13 := a13 - a03
+              g14 := a14 - a04
+              g15 := a15 - a05
+              ave := g10 + g11*mZ1 + g12*mZ2 + g13*mXi1 + g14*mXi2 + g15*mMPS
+          ', '\n', EtaExists()[[1]])
+        }else if(n_m_cov()==2 & n_l_cov()==1){
+          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*Z2 + c(a03,a13)*estXi1 + c(a04,a14)*mMPS', '\n',
+          EtaExists()[[2]],' ~ c(a00,a10)*1
+          Z1 ~ c(mZ1_0,mZ1_1)*1
+          estXi1 ~ c(mXi1_0,mXi1_1)*1
+          MPS ~ c(mMPS_0,mMPS_1)*1
+          
+          group % c(gw0,gw1)*w
+          N := exp(gw0) + exp(gw1)
+          relfreq0 := exp(gw0)/N
+          relfreq1 := exp(gw1)/N
+          
+          mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
+          mZ2 := mZ2_0*relfreq0 + mZ2_1*relfreq1
+          mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
+          mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+          
+          g10 := a10 - a00
+          g11 := a11 - a01
+          g12 := a12 - a02
+          g13 := a13 - a03
+          g14 := a14 - a04
+          ave := g10 + g11*mZ1 + g12*mZ2 + g13*mXi1 + g14*mMPS
+          ', '\n', EtaExists()[[1]])
+        }else if(n_m_cov()==0 & n_l_cov()==2){
+          sem_m <- paste0(EtaExists()[[2]], ' ~ c(a01,a11)*estXi1 + c(a02,a12)*estXi2 + c(a03,a13)*MPS', '\n',
+          EtaExists()[[2]],' ~ c(a00,a10)*1
+          estXi1 ~ c(mXi1_0,mXi1_1)*1
+          estXi2 ~ c(mXi2_0,mXi2_1)*1
+          MPS ~ c(mMPS_0,mMPS_1)*1
+          
+          group % c(gw0,gw1)*w
+          N := exp(gw0) + exp(gw1)
+          relfreq0 := exp(gw0)/N
+          relfreq1 := exp(gw1)/N
+          
+          mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
+          mXi2 := mXi2_0*relfreq0 + mXi2_1*relfreq1
+          mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+          
+          g10 := a10 - a00
+          g11 := a11 - a01
+          g12 := a12 - a02
+          g13 := a13 - a03
+          ave := g10 + g11*mXi1 + g12*mXi2 + g13*mMPS', '\n', EtaExists()[[1]])
+        }
+        sem(model=sem_m, data=MPS(), group="X", group.label=c("0","1"))
+        #cat(sem_m)
+      })
 
 
     ################################# proved EffectLiteR approach ############################################
@@ -857,8 +965,11 @@ shinyServer(
     
     
     
-    
-    
+      ############################################ Output for UI ############################################
+    # Output Raykov
+      output$raykov <- renderPrint({
+        summary(fit_raykov())
+      })
     
     # output$t <- renderPrint({
     #   MPS()
@@ -878,8 +989,7 @@ shinyServer(
    # })
       
     output$est <- renderTable({
-      head(est_factor_scores())
-      head(MPS())
+
     })
     
     
