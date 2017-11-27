@@ -37,7 +37,7 @@ shinyUI(fluidPage(
                    fluidRow(column(6, numericInput(inputId="mean_xi1", label=h5(strong("Mean(Xi\u2081)")),
                                                    value=0, width='100%', min=100, max=100)),
                             column(6, sliderInput(inputId="sd_xi1", label=h5(strong("SD(Xi\u2081)")),
-                                                  value=1, min=0.001, max=4))
+                                                  value=1, min=0.001, max=4, step=0.01))
                    ),
                    # indicators
                    h3(strong("Y\u2081\u2081\u2081 =")),
@@ -57,7 +57,7 @@ shinyUI(fluidPage(
                             column(2),
                             column(2, p("0", align = "center")),
                             column(2, numericInput(inputId="sd_e111",
-                                               label=NULL, value=1, min=0.001, max=3, width='100%'))),
+                                               label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01))),
                    h3(strong("Y\u2082\u2081\u2081 =")),
                    fluidRow(column(2, h4("\u03BD\u2082\u2081\u2081")),
                             column(1, h4("+")),
@@ -75,7 +75,7 @@ shinyUI(fluidPage(
                             column(2),
                             column(2, p("0", align = "center")),
                             column(2, numericInput(inputId="sd_e211",
-                                               label=NULL, value=1, min=0.001, max=3, width='100%'))),
+                                               label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01))),
                    h3(strong("Y\u2083\u2081\u2081 =")),
                    fluidRow(column(2, h4("\u03BD\u2083\u2081\u2081")),
                             column(1, h4("+")),
@@ -93,7 +93,7 @@ shinyUI(fluidPage(
                             column(2),
                             column(2, p("0", align = "center")),
                             column(2, numericInput(inputId="sd_e311",
-                                               label=NULL, value=1, min=0.001, max=3, width='100%')))
+                                               label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01)))
                  ),
                  br(),
                  conditionalPanel(
@@ -121,7 +121,7 @@ shinyUI(fluidPage(
                             column(2),
                             column(2, p("0", align = "center")),
                             column(2, numericInput(inputId="sd_e112",
-                                               label=NULL, value=1, min=0.001, max=3, width='100%'))),
+                                               label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01))),
                    h3(strong("Y\u2082\u2081\u2082")),
                    fluidRow(column(2, h4("\u03BD\u2082\u2081\u2082")),
                             column(1, h4("+")),
@@ -139,7 +139,7 @@ shinyUI(fluidPage(
                             column(2),
                             column(2, p("0", align = "center")),
                             column(2, numericInput(inputId="sd_e212",
-                                                   label=NULL, value=1, min=0.001, max=3, width='100%'))),
+                                                   label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01))),
                    h3(strong("Y\u2083\u2081\u2082")),
                    fluidRow(column(2, h4("\u03BD\u2083\u2081\u2082")),
                             column(1, h4("+")),
@@ -157,7 +157,7 @@ shinyUI(fluidPage(
                             column(2),
                             column(2, p("0", align = "center")),
                             column(2, numericInput(inputId="sd_e312",
-                                                   label=NULL, value=1, min=0.001, max=3, width='100%')))
+                                                   label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01)))
                  ),
                  br(),
                  br(),
@@ -172,7 +172,7 @@ shinyUI(fluidPage(
                    condition = "input.n_m_cov > 0",
                    h4(strong("Manifeste Kovariate Z\u2081")),
                    fluidRow(column(6, numericInput(inputId="mean_z1", label="Mean(Z\u2081)", value=0)),
-                            column(6, numericInput(inputId="sd_z1", label="SD(Z\u2081)", value=1)))
+                            column(6, numericInput(inputId="sd_z1", label="SD(Z\u2081)", value=1, step=0.01)))
                  ),
                  br(),
                  br(),
@@ -180,7 +180,7 @@ shinyUI(fluidPage(
                    condition = "input.n_m_cov > 1",
                    h4(strong("Manifeste Kovariate Z\u2082")),
                    fluidRow(column(6, numericInput(inputId="mean_z2", label="Mean(Z\u2082)", value=0)),
-                            column(6, numericInput(inputId="sd_z2", label="SD(Z\u2082)", value=1)))
+                            column(6, numericInput(inputId="sd_z2", label="SD(Z\u2082)", value=1, step=0.01)))
                  ),
                  br(),
                  ## variance-covariance-matrix
@@ -212,7 +212,7 @@ shinyUI(fluidPage(
                            column(2),
                            column(2, p("0", align = "center")),
                            column(2, numericInput(inputId="sd_e121",
-                                                  label=NULL, value=1, min=0.001, max=3, width='100%'))),
+                                                  label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01))),
                   h3(strong("Y\u2082\u2082\u2081 =")),
                   fluidRow(column(2, div("$$\\nu_{221}$$")),
                            column(1, div("$$+$$")),
@@ -230,7 +230,7 @@ shinyUI(fluidPage(
                            column(2),
                            column(2, p("0", align = "center")),
                            column(2, numericInput(inputId="sd_e221",
-                                                  label=NULL, value=1, min=0.001, max=3, width='100%'))),
+                                                  label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01))),
                   h3(strong("Y\u2082\u2081\u2081 =")),
                   fluidRow(column(2, div("$$\\nu_{321}$$")),
                            column(1, div("$$+$$")),
@@ -248,7 +248,7 @@ shinyUI(fluidPage(
                            column(2),
                            column(2, p("0", align = "center")),
                            column(2, numericInput(inputId="sd_e321",
-                                                  label=NULL, value=1, min=0.001, max=3, width='100%')))
+                                                  label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01)))
                 )
        ),
        ############# Specifying Selection Bias ##########

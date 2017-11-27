@@ -110,7 +110,7 @@ shinyServer(
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, p("0", align = "center")),
-                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%')))
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%', step=0.01)))
         )
       }else if(n_m_cov() == 1 & n_l_cov() == 2){
         tagList(
@@ -707,16 +707,20 @@ shinyServer(
       #   }
       # }
       # )
+    ### useful function for eta; list elements:
+      # 1.: string for additional model
+      # 2.: name of DV either Y or if latent Eta
+      # 3.: tool for naming columns regarding the factor score estimates for Raykov (although factor score for eta not used)
       EtaExists <- reactive({
         if(input$dv=="manifestDV"){
-          return(list(NULL, "Y"))
+          return(list(NULL, "Y", NULL))
         }else{
           mEta <- 'Eta =~ c(1,1)*Y121 + Y221 + Y321
                     #Eta ~ NA*1       duplicate model element
                   Y121 ~ c(0,0)*1
                   Y221 ~ c(nu221,nu221)*1
                   Y321 ~ c(nu321,nu321)*1'
-          return(list(mEta, "Eta"))
+          return(list(mEta, "Eta", "estEta"))
         }
       })
       
@@ -724,15 +728,15 @@ shinyServer(
       # small xi in case effectLiteR function takes the capital ones from dataframe
       mm <- reactive({
         if(n_l_cov()==1){
-          'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
+          m <- 'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
                 Y111 ~ c(0,0)*1
                 Y211 ~ c(nu211,nu211)*1
                 Y311 ~ c(nu311,nu311)*1
               '
-          #m <- paste(m, EtaExists()[[1]], sep="\n ")
+          paste(m, EtaExists()[[1]], sep="\n ")
           
         }else if(n_l_cov()==2){
-          'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
+          m <- 'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
             xi2 =~ c(1,1)*Y112 + c(la212,la212)*Y212 + c(la312,la312)*Y312
           Y111 ~ c(0,0)*1
           Y211 ~ c(nu211,nu211)*1
@@ -742,7 +746,7 @@ shinyServer(
           Y212 ~ c(nu212,nu212)*1
           Y312 ~ c(nu312,nu312)*1
           '
-          #m <- paste(m, EtaExists()[[1]], sep="\n ")
+          paste(m, EtaExists()[[1]], sep="\n ")
         }
         })
     ############################################ Raykov's idea ###############################################
@@ -753,9 +757,9 @@ shinyServer(
         fit <- cfa(model=mm(), data=d, group="X")
         estFactorScores <- do.call(rbind, lavPredict(fit))
         if(n_l_cov()==1){
-          colnames(estFactorScores) <- c("estXi1")
+          colnames(estFactorScores) <- c("estXi1", EtaExists()[[3]])
         }else{
-          colnames(estFactorScores) <- c("estXi1", "estXi2")
+          colnames(estFactorScores) <- c("estXi1", "estXi2", EtaExists()[[3]])
         }
         cbind(d, estFactorScores)
       })
@@ -922,7 +926,7 @@ shinyServer(
     })
     
     ################################# new latent Propensity Score approach ###################################
-    ## using lavaan to estimate treatment effect with latent PSs
+    ## using lavaan to estimate treatment effects with latent PSs
     ##### Full multigroup model specification with stochastic predictors and group sizes #####
     #   
     # mm <- '
@@ -973,24 +977,9 @@ shinyServer(
         summary(fit_sem_effectLite()@results@lavresults, fit.measures=T)
       })
       
+    # Output new Method  
       
-      
-    # output$t <- renderPrint({
-    #   MPS()
-    # })
-      
-      
-    # output$effectLiteApproach <- renderPrint({
-    #   res <- fit_sem_effectLite()
-    #   #summary(res@results@lavresults, fit.measures=TRUE)
-    #   #print(res)
-    #   res@results@Egx
-    #   cat(res@syntax@model)
-    #   #summary(fit@results@lavresults)
-    #   
 
-
-   # })
       
     output$est <- renderTable({
 
