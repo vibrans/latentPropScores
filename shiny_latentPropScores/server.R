@@ -709,14 +709,14 @@ shinyServer(
       # )
       EtaExists <- reactive({
         if(input$dv=="manifestDV"){
-          return(list(NULL, "Y "))
+          return(list(NULL, "Y"))
         }else{
           mEta <- 'Eta =~ c(1,1)*Y121 + Y221 + Y321
                     #Eta ~ NA*1       duplicate model element
                   Y121 ~ c(0,0)*1
                   Y221 ~ c(nu221,nu221)*1
                   Y321 ~ c(nu321,nu321)*1'
-          return(list(mEta, "Eta "))
+          return(list(mEta, "Eta"))
         }
       })
       
@@ -725,7 +725,6 @@ shinyServer(
       mm <- reactive({
         if(n_l_cov()==1){
           'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
-                xi1 ~ NA*1
                 Y111 ~ c(0,0)*1
                 Y211 ~ c(nu211,nu211)*1
                 Y311 ~ c(nu311,nu311)*1
@@ -734,9 +733,7 @@ shinyServer(
           
         }else if(n_l_cov()==2){
           'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
-                xi2 =~ c(1,1)*Y112 + c(la212,la212)*Y212 + c(la312,la312)*Y312
-                xi1 ~ NA*1
-                xi2 ~ NA*1
+            xi2 =~ c(1,1)*Y112 + c(la212,la212)*Y212 + c(la312,la312)*Y312
           Y111 ~ c(0,0)*1
           Y211 ~ c(nu211,nu211)*1
           Y311 ~ c(nu311,nu311)*1
@@ -778,7 +775,7 @@ shinyServer(
       # originally with lm function but for comparability at least parameterization should be similar
       # apart from that in case of latent dv now regression estimated with lavaan
       # why Raykov uses the estimated factor scores in addition to his estimated PS - I don't know why
-      fit_raykov <- reactive({
+      fit_sem_raykov <- reactive({
         if(n_m_cov()==1 & n_l_cov()==1){
           sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*estXi1 + c(a03,a13)*MPS', '\n',
               EtaExists()[[2]],'~ c(a00,a10)*1
@@ -968,9 +965,16 @@ shinyServer(
       ############################################ Output for UI ############################################
     # Output Raykov
       output$raykov <- renderPrint({
-        summary(fit_raykov())
+        summary(fit_sem_raykov())
       })
     
+    # Output EffectLiteR
+      output$effectLite <- renderPrint({
+        summary(fit_sem_effectLite()@results@lavresults, fit.measures=T)
+      })
+      
+      
+      
     # output$t <- renderPrint({
     #   MPS()
     # })
