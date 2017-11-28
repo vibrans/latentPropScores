@@ -726,6 +726,7 @@ shinyServer(
       
     ### measurement model
       # small xi in case effectLiteR function takes the capital ones from dataframe
+      # xi1~c(mz002,mz102)*1 is doublicate model element :-( in effectLiteR
       mm <- reactive({
         if(n_l_cov()==1){
           m <- 'xi1 =~ c(1,1)*Y111 + c(la211,la211)*Y211 + c(la311,la311)*Y311
@@ -926,43 +927,186 @@ shinyServer(
     })
     
     ################################# new latent Propensity Score approach ###################################
-    ## using lavaan to estimate treatment effects with latent PSs
-    ##### Full multigroup model specification with stochastic predictors and group sizes #####
-    #   
-    # mm <- '
-    #   xi =~ c(1,1)*y11 + c(la2,la2)*y21 + c(la3,la3)*y31
-    #   xi ~ c(mxi0,mxi1)*1
-    #   z ~ c(mz0,mz1)*1
-    #   
-    #   y11 ~ c(0,0)*1
-    #   y21 ~ c(nu2,nu2)*1
-    #   y31 ~ c(nu3,nu3)*1
-    #   
-    #   probit <~ 0.6018074*xi + 0.5960086*z
-    #   probit ~ -0.0137318*1
-    #   xi ~~ 0*probit
-    #   
-    #   y ~ c(a01,a11)*probit ## with interaction
-    #   y ~ c(a00,a10)*1
-    #   
-    #   group % c(gw0,gw1)*w
-    #   N := exp(gw0) + exp(gw1)
-    #   relfreq0 := exp(gw0)/N
-    #   relfreq1 := exp(gw1)/N
-    #   
-    #   mprobit0 := -0.0137318 + 0.6018074*mxi0 + 0.5960086*mz0
-    #   mprobit1 := -0.0137318 + 0.6018074*mxi1 + 0.5960086*mz1
-    #   mprobit := mprobit0*relfreq0 + mprobit1*relfreq1
-    #   
-    #   g10 := a10 - a00
-    #   g11 := a11 - a01
-    #   
-    #   ave := g10 + g11*mprobit  ## average effect
-    #   '
+    #!# das ist der Höhepunkt des Rumgewurschtels
+    ## step 1: estimate coefficients of probit or logit regression (modelling the assignment mechanism)
+      indVars <- reactive({
+        indVars <- intersect(c("Z1", "Z2", "Xi1", "Xi2"), names(data()))
+        gsub("X", "x", indVars)
+      })
+      fit_propScores <- reactive({
+        if(n_l_cov()==1){
+          mm <- 'xi1 =~ 1*Y111 + Y211 + Y311
+                Y111 ~ 0*1
+                xi1 ~ NA*1
+              '
+        }else if(n_l_cov()==2){
+          mm <- 'xi1 =~ 1*Y111 + Y211 + Y311
+            xi2 =~ 1*Y112 + Y212 + Y312
+          Y111 ~ 0*1
+          xi1 ~ NA*1
+
+          Y112 ~ 0*1
+          xi2 ~ NA*1
+          '
+        }
+        d <- data()
+        m_ps <- paste0(mm, "X ~", paste(indVars(), collapse=" + "))
+        sem(m_ps, data=d, ordered="X", parameterization="theta")
+      })
       
-      #m5 <- sem(mm, data=d, group="x", group.label=c("0","1"))
-      #summary(m5)
-    
+    ## step 2: take coefficients from logit/probit regression and estimate causal effect
+      #!# oo~:(
+      formula_probit <- reactive({
+        a <- coef(fit_propScores())[c("X|t1", "X~Z1", "X~Z2", "X~xi1", "X~xi2")]  # first element of vector is threshold
+        a <- a[!is.na(a)]
+        probit <- paste0('probit <~ ', paste(a[-1], indVars(), sep="*", collapse="+"), '\n',
+                        'probit ~ ', a[1]*(-1), '*1') # negative of threshold
+
+        MindVar0 <- strsplit(paste("m", gsub("x", "X", indVars()), "_0", collapse=" ", sep=""), " ")
+        mProbit0 <- paste0('mProbit0 := ', paste(a, c("1", MindVar0[[1]]), sep="*", collapse="+"))
+
+        MindVar1 <- strsplit(paste("m", gsub("x", "X", indVars()), "_1", collapse=" ", sep=""), " ")
+        mProbit1 <- paste0('mProbit1 := ', paste(a, c("1", MindVar1[[1]]), sep="*", collapse="+"))
+        return(list(probit, mProbit0, mProbit1))
+      })
+      fit_latProp_sem <- reactive({
+        if(n_m_cov()==1 & n_l_cov()==1){
+          m_sem <- paste0(mm(), '\n',
+                         'Z1 ~ c(mZ1_0,mZ1_1)*1
+                         xi1 ~ c(mXi1_0,mXi1_1)*1', '\n',
+
+                         formula_probit()[[1]], '\n',
+                         'xi1 ~~ 0*probit', '\n',
+                          EtaExists()[[2]], ' ~ c(a01,a11)*probit ## with interaction', '\n',
+                          EtaExists()[[2]], ' ~ c(a00,a10)*1', '\n',
+
+                         'group % c(gw0,gw1)*w
+                         N := exp(gw0) + exp(gw1)
+                         relfreq0 := exp(gw0)/N
+                         relfreq1 := exp(gw1)/N', '\n',
+                         formula_probit()[[2]], '\n',
+                         formula_probit()[[3]], '\n',
+
+                         'mProbit := mProbit0*relfreq0 + mProbit1*relfreq1
+
+                         g10 := a10 - a00
+                         g11 := a11 - a01
+
+                         ave := g10 + g11*mProbit  ## average effect
+                         '
+                         )
+        }else if(n_m_cov()==1 & n_l_cov()==2){
+          m_sem <- paste0(mm(), '\n',
+                         'Z1 ~ c(mZ1_0,mZ1_1)*1
+                         xi1 ~ c(mXi1_0,mXi1_1)*1
+                         xi2 ~ c(mXi2_0,mXi2_1)*1', '\n',
+                         
+                         formula_probit()[[1]], '\n',
+                         'xi1 ~~ 0*probit
+                         xi2 ~~ 0*probit', '\n',
+                         EtaExists()[[2]], ' ~ c(a01,a11)*probit ## with interaction', '\n',
+                         EtaExists()[[2]], ' ~ c(a00,a10)*1', '\n',
+                         
+                         'group % c(gw0,gw1)*w
+                         N := exp(gw0) + exp(gw1)
+                         relfreq0 := exp(gw0)/N
+                         relfreq1 := exp(gw1)/N', '\n',
+                         formula_probit()[[2]], '\n',
+                         formula_probit()[[3]], '\n',
+                         
+                         'mProbit := mProbit0*relfreq0 + mProbit1*relfreq1
+                         
+                         g10 := a10 - a00
+                         g11 := a11 - a01
+                         
+                         ave := g10 + g11*mProbit  ## average effect
+                         '
+          )
+        }else if(n_m_cov()==1 & n_l_cov()==2){
+          m_sem <- paste0(mm(), '\n',
+                         'Z1 ~ c(mZ1_0,mZ1_1)*1
+                          Z2 ~ c(mZ2_0,mZ2_1)*1
+                         xi1 ~ c(mXi1_0,mXi1_1)*1
+                         xi2 ~ c(mXi2_0,mXi2_1)*1', '\n',
+                         
+                         formula_probit()[[1]], '\n',
+                         'xi1 ~~ 0*probit
+                         xi2 ~~ 0*probit', '\n',
+                         EtaExists()[[2]], ' ~ c(a01,a11)*probit ## with interaction', '\n',
+                         EtaExists()[[2]], ' ~ c(a00,a10)*1', '\n',
+                         
+                         'group % c(gw0,gw1)*w
+                         N := exp(gw0) + exp(gw1)
+                         relfreq0 := exp(gw0)/N
+                         relfreq1 := exp(gw1)/N', '\n',
+                         formula_probit()[[2]], '\n',
+                         formula_probit()[[3]], '\n',
+                         
+                         'mProbit := mProbit0*relfreq0 + mProbit1*relfreq1
+                         
+                         g10 := a10 - a00
+                         g11 := a11 - a01
+                         
+                         ave := g10 + g11*mProbit  ## average effect
+                         '
+          )
+        }else if(n_m_cov()==2 & n_l_cov()==1){
+          m_sem <- paste0(mm(), '\n',
+                         'Z1 ~ c(mZ1_0,mZ1_1)*1
+                          Z2 ~ c(mZ2_0,mZ2_1)*1
+                         xi1 ~ c(mXi1_0,mXi1_1)*1', '\n',
+                         
+                         formula_probit()[[1]], '\n',
+                         'xi1 ~~ 0*probit','\n',
+                         EtaExists()[[2]], ' ~ c(a01,a11)*probit ## with interaction', '\n',
+                         EtaExists()[[2]], ' ~ c(a00,a10)*1', '\n',
+                         
+                         'group % c(gw0,gw1)*w
+                         N := exp(gw0) + exp(gw1)
+                         relfreq0 := exp(gw0)/N
+                         relfreq1 := exp(gw1)/N', '\n',
+                         formula_probit()[[2]], '\n',
+                         formula_probit()[[3]], '\n',
+                         
+                         'mProbit := mProbit0*relfreq0 + mProbit1*relfreq1
+                         
+                         g10 := a10 - a00
+                         g11 := a11 - a01
+                         
+                         ave := g10 + g11*mProbit  ## average effect
+                         '
+          )
+        }else if(n_m_cov()==0 & n_l_cov()==2){
+          m_sem <- paste0(mm(), '\n',
+                         'xi1 ~ c(mXi1_0,mXi1_1)*1
+                         xi2 ~ c(mXi2_0,mXi2_1)*1', '\n',
+                         
+                         formula_probit()[[1]], '\n',
+                         'xi1 ~~ 0*probit
+                         xi2 ~~ 0*probit',  '\n',
+                         EtaExists()[[2]], ' ~ c(a01,a11)*probit ## with interaction', '\n',
+                         EtaExists()[[2]], ' ~ c(a00,a10)*1',  '\n',
+                         
+                         'group % c(gw0,gw1)*w
+                         N := exp(gw0) + exp(gw1)
+                         relfreq0 := exp(gw0)/N
+                         relfreq1 := exp(gw1)/N',  '\n',
+                         formula_probit()[[2]], '\n',
+                         formula_probit()[[3]], '\n',
+                         
+                         'mProbit := mProbit0*relfreq0 + mProbit1*relfreq1
+                         
+                         g10 := a10 - a00
+                         g11 := a11 - a01
+                         
+                         ave := g10 + g11*mProbit  ## average effect
+                         '
+          )
+        }
+        sem(m_sem, data=data(), group="X", group.label=c("0","1"))
+        
+      })
+
     
     
     
@@ -978,7 +1122,10 @@ shinyServer(
       })
       
     # Output new Method  
-      
+      output$newLatPS <- renderPrint({
+        summary(fit_latProp_sem())
+        #print(fit_latProp_sem())
+      })
 
       
     output$est <- renderTable({

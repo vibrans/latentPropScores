@@ -276,7 +276,8 @@ shinyUI(fluidPage(
                  verbatimTextOutput("raykov")),
         tabPanel('EffectLiteR-Methode',
                  verbatimTextOutput("effectLite")),
-        tabPanel('neue latente PS-Methode'),
+        tabPanel('neue latente PS-Methode',
+                 verbatimTextOutput("newLatPS")),
         tabPanel('Vergleich')
       )
       
