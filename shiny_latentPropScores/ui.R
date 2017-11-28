@@ -1,8 +1,9 @@
 library(shiny)
 library(MASS)
 library(EffectLiteR) # loads lavaan automatically
-# Estimating Causal Effects by Adjusting for Propensity Scores computed from Latent Variables
+library(DT)
 
+# Estimating Causal Effects by Adjusting for Propensity Scores computed from Latent Variables
 shinyUI(fluidPage(
   titlePanel(h3("Schätzung kausaler Effekte durch Adjustierung für latente Propensity Scores")),
   
@@ -22,7 +23,12 @@ shinyUI(fluidPage(
       ## number of repetitions of simulations ##
       radioButtons(inputId="n_rep", label="Wähle Anzahl der Simulationen", 
                    choices=c("1"="gramm", "1000"="dp","50 000"="z", "100 000"="dz")), # dp ... Doppelpfund, # dz ... Doppelzentner
-      
+      br(),
+      ## Go-Button
+      actionButton(inputId="go", "Starte Analyse", 
+                   style="color: #fff; background-color: #9c3e5e; border-color: #2e6da4"),
+
+      tags$hr(style="border-color: purple;"),
       tabsetPanel(
         ############# independent variables #############
         tabPanel('Unabhängige Variablen',
@@ -162,7 +168,6 @@ shinyUI(fluidPage(
                  br(),
                  br(),
                  br(),
-                 br(),
                  tags$hr(style="border-color: purple;"),
                  # number of manifest covariates
                  fluidRow(column(6, h4("Anzahl manifester Kovariaten")),
@@ -278,10 +283,11 @@ shinyUI(fluidPage(
                  verbatimTextOutput("effectLite")),
         tabPanel('neue latente PS-Methode',
                  verbatimTextOutput("newLatPS")),
-        tabPanel('Vergleich')
+        tabPanel('Vergleich',
+                 DT::dataTableOutput("comp"))
       )
       
-      #uiOutput("ahhh")
+      #tableOutput("est")
       
     )
   )

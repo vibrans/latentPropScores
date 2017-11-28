@@ -326,29 +326,29 @@ shinyServer(
     ## specify covariances
     output$cov <- renderUI({
       if(n_m_cov()==1 & n_l_cov()==1){
-        numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=v$v_cov_z1_xi1)
+        numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=v$v_cov_z1_xi1, step=0.1)
       }else if(n_m_cov()==1 & n_l_cov()==2){
-        fluidRow(column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)),
-                 column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi\u2082)", value=0)),
-                 column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0)))
+        fluidRow(column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0, step=0.1)),
+                 column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi\u2082)", value=0, step=0.1)),
+                 column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0, step=0.1)))
       }else if(n_m_cov()==2 & n_l_cov()==2){
         tagList(
-          fluidRow(column(4, numericInput(inputId="cov_z1_z2", label="Cov(Z\u2081, Z\u2082)", value=0)),
-                   column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)),
-                   column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi\u2082)", value=0))),
-          fluidRow(column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0)),
-                   column(4, numericInput(inputId="cov_z2_xi1", label="Cov(Z\u2082, Xi\u2081)", value=0)),
-                   column(4, numericInput(inputId="cov_z2_xi2", label="Cov(Z\u2082, Xi\u2082)", value=0))
+          fluidRow(column(4, numericInput(inputId="cov_z1_z2", label="Cov(Z\u2081, Z\u2082)", value=0, step=0.1)),
+                   column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0, step=0.1)),
+                   column(4, numericInput(inputId="cov_z1_xi2", label="Cov(Z\u2081, Xi\u2082)", value=0, step=0.1))),
+          fluidRow(column(4, numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=0, step=0.1)),
+                   column(4, numericInput(inputId="cov_z2_xi1", label="Cov(Z\u2082, Xi\u2081)", value=0, step=0.1)),
+                   column(4, numericInput(inputId="cov_z2_xi2", label="Cov(Z\u2082, Xi\u2082)", value=0, step=0.1))
           )
         )
       }else if(n_m_cov()==2 & n_l_cov()==1){
         tagList(
-          fluidRow(column(4, numericInput(inputId="cov_z1_z2", label="Cov(Z\u2081, Z\u2082)", value=0)),
-                   column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0)),
-                   column(4, numericInput(inputId="cov_z2_xi1", label="Cov(Z\u2082, Xi\u2081)", value=0)))
+          fluidRow(column(4, numericInput(inputId="cov_z1_z2", label="Cov(Z\u2081, Z\u2082)", value=0, step=0.1)),
+                   column(4, numericInput(inputId="cov_z1_xi1", label="Cov(Z\u2081, Xi\u2081)", value=0, step=0.1)),
+                   column(4, numericInput(inputId="cov_z2_xi1", label="Cov(Z\u2082, Xi\u2081)", value=0, step=0.1)))
         )
       }else if(n_m_cov()==0 & n_l_cov()==2){
-        numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=v$v_cov_xi1_xi2)
+        numericInput(inputId="cov_xi1_xi2", label="Cov(Xi\u2081, Xi\u2082)", value=v$v_cov_xi1_xi2, step=0.1)
       }
     })
     
@@ -509,8 +509,8 @@ shinyServer(
      })
     
 ##############################################################################################################
+
     # data generation
-    
     N <- reactive(input$N)
     link <- reactive(input$link)
 
@@ -857,9 +857,10 @@ shinyServer(
               ave := g10 + g11*mZ1 + g12*mZ2 + g13*mXi1 + g14*mXi2 + g15*mMPS
           ', '\n', EtaExists()[[1]])
         }else if(n_m_cov()==2 & n_l_cov()==1){
-          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*Z2 + c(a03,a13)*estXi1 + c(a04,a14)*mMPS', '\n',
+          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*Z2 + c(a03,a13)*estXi1 + c(a04,a14)*MPS', '\n',
           EtaExists()[[2]],' ~ c(a00,a10)*1
           Z1 ~ c(mZ1_0,mZ1_1)*1
+          Z2 ~ c(mZ2_0,mZ2_1)*1
           estXi1 ~ c(mXi1_0,mXi1_1)*1
           MPS ~ c(mMPS_0,mMPS_1)*1
           
@@ -969,7 +970,7 @@ shinyServer(
         mProbit1 <- paste0('mProbit1 := ', paste(a, c("1", MindVar1[[1]]), sep="*", collapse="+"))
         return(list(probit, mProbit0, mProbit1))
       })
-      fit_latProp_sem <- reactive({
+      fit_sem_latProp <- reactive({
         if(n_m_cov()==1 & n_l_cov()==1){
           m_sem <- paste0(mm(), '\n',
                          'Z1 ~ c(mZ1_0,mZ1_1)*1
@@ -1022,7 +1023,7 @@ shinyServer(
                          ave := g10 + g11*mProbit  ## average effect
                          '
           )
-        }else if(n_m_cov()==1 & n_l_cov()==2){
+        }else if(n_m_cov()==2 & n_l_cov()==2){
           m_sem <- paste0(mm(), '\n',
                          'Z1 ~ c(mZ1_0,mZ1_1)*1
                           Z2 ~ c(mZ2_0,mZ2_1)*1
@@ -1123,15 +1124,39 @@ shinyServer(
       
     # Output new Method  
       output$newLatPS <- renderPrint({
-        summary(fit_latProp_sem())
-        #print(fit_latProp_sem())
+        summary(fit_sem_latProp())
+
+      })
+    
+    # Vergleich
+      overview <- reactive({
+        ave_raykov <- parameterEstimates(fit_sem_raykov())[parameterEstimates(fit_sem_raykov())$lhs=="ave", c(7,8)]
+        ave_effectLiteR <- fit_sem_effectLite()@results@Egx[c(1, 2)]
+        ave_latProp <- parameterEstimates(fit_sem_latProp())[parameterEstimates(fit_sem_latProp())$lhs=="ave", c(7,8)]
+        data.frame(c(ave_raykov, ave_effectLiteR, ave_latProp), nrow=1)
+      })
+      output$comp <- DT::renderDataTable({
+        sketch = htmltools::withTags(table(
+          class = 'display',
+          thead(
+            tr(
+              th(rowspan = 2, ''),
+              th(colspan = 2, 'Raykov-Methode'),
+              th(colspan = 2, 'EffectLiteR-Methode'),
+              th(colspan = 2, 'neue Methode')
+            ),
+            tr(
+              lapply(rep(c('Estimate', 'SE'), 3), th)
+            )
+          )
+        ))
+        DT::datatable(overview(), container=sketch)
+
       })
 
       
-    output$est <- renderTable({
 
-    })
-    
+
     
   }
 )
