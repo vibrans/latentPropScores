@@ -353,7 +353,7 @@ shinyServer(
       }
     })
     
-    
+
     ####################### default values depending on choice of preconfiguration ########################
      v <- reactiveValues()
      observeEvent(input$conf, {
@@ -391,28 +391,11 @@ shinyServer(
          # set covariance to 0
          v$v_cov_z1_xi1 <- 0
          ########## conditional treatment probability
-         v$v_alpha0 <- 0
-         v$v_alpha1 <- 1
-         v$v_alpha2 <- 1
-         v$v_alpha3 <- 1
-         v$v_alpha4 <- 1
+         eval(parse(text=paste0("v$v_alpha",c(0,1,2,3,4)," <- ", c(0, 1, 1, 1, 1))))
          ######## regression
-         # BE AWARE: coefficients of manifest covariates first and then of latent covariates
-         # adapt coefficients of baseline function g0
-         #!# problem: lapply(0:2, function(i, l=c(0, 1, 1)) v[[paste0("v$v_gamma00", i)]] <- l[i+1])
-         #!# -> 1. get("v$v_gamma000") necessary to get value / v$v_gamma000 not working;
-         #!# assignment of vectorelement l[i] not possible (don't know why)
-         v$v_gamma000 <- 0
-         v$v_gamma001 <- 1
-         v$v_gamma002 <- 1
-         v$v_gamma003 <- 1
-         v$v_gamma004 <- 1
+         eval(parse(text=paste0("v$v_gamma00", c(0,1,2,3,4), " <- ", c(0, 1, 1, 1, 1))))
          # adapt coefficients for effect function g1 (treatmenteffect 0.15; no interaction cov*X)
-         v$v_gamma100 <- 0.2
-         v$v_gamma101 <- 0
-         v$v_gamma102 <- 0
-         v$v_gamma103 <- 0
-         v$v_gamma104 <- 0
+         eval(parse(text=paste0("v$v_gamma10", c(0,1,2,3,4)," <- ", c(0.2, 0, 0, 0, 0))))
          # adapt mean and standard deviance
          v$v_mean_zeta <-  0
          v$v_sd_zeta <-  0.35
@@ -443,19 +426,13 @@ shinyServer(
          v$v_cov_z1_xi1 <- 0
          
          ########## conditional treatment probability
-         v$v_alpha0 <- 0
-         v$v_alpha1 <- 1
-         v$v_alpha2 <- 1
+         eval(parse(text=paste0("v$v_alpha", c(0,1,2)," <- ", c(0, 1, 1))))
         ######## regression
         # BE AWARE: coefficients of manifest covariates first and then of latent covariates
         # adapt coefficients of baseline function g0
-         v$v_gamma000 <- 0.4
-         v$v_gamma001 <- 0.6
-         v$v_gamma002 <- 0.7
+         eval(parse(text=paste0("v$v_gamma00", c(0,1,2)," <- ", c(0.4, 0.6, 0.7))))
         # adapt coefficients for effect function g1
-         v$v_gamma100 <- 0.5
-         v$v_gamma101 <- 0
-         v$v_gamma102 <- 0
+         eval(parse(text=paste0("v$v_gamma10", c(0,1,2)," <- ", c(0.5, 0, 0))))
         # adapt mean and standard deviance
          v$v_mean_zeta <- 0
          v$v_sd_zeta <- 0.7
@@ -490,19 +467,13 @@ shinyServer(
         # set covariance to 0.5
          v$v_cov_xi1_xi2 <- 0.5
          ########## conditional treatment probability
-         v$v_alpha0 <- 0
-         v$v_alpha1 <- 0.4
-         v$v_alpha2 <- 0.6
+         eval(parse(text=paste0("v$v_alpha", c(0,1,2)," <- ", c(0, 0.4, 0.6))))
         ######## regression
         # BE AWARE: coefficients of manifest covariates first and then of latent covariates
         # adapt coefficients of baseline function g0
-         v$v_gamma000 <- 0
-         v$v_gamma001 <- 0.5
-         v$v_gamma002 <- 0.7
+         eval(parse(text=paste0("v$v_gamma00", c(0,1,2)," <- ", c(0, 0.5, 0.7))))
         # adapt coefficients for effect function g1
-         v$v_gamma100 <- 0.15
-         v$v_gamma101 <- 0
-         v$v_gamma102 <- 0
+         eval(parse(text=paste0("v$v_gamma10", c(0,1,2)," <- ", c(0.15, 0, 0))))
         # adapt mean and standard deviance
         v$v_mean_zeta <- 0
         v$v_sd_zeta <- 0.3
@@ -1178,7 +1149,11 @@ shinyServer(
 
       })
 
-      
+      # Output head data
+      output$data <- renderTable({
+        head(data())
+        
+      })
 
 
     

@@ -206,7 +206,7 @@ shinyUI(fluidPage(
                            column(2, div("$$\\lambda_{121}*\\eta$$")),
                            column(1, div("$$+$$")),
                            column(1, div("$$($$")),
-                           column(2, div("$$Mean(\\epsilon_{121}), $$")),
+                           column(2, div("$$Mean(\\epsilon_{121}), $$ ")),
                            column(2, div("$$SD(\\epsilon_{121})$$")),
                            column(1, div("$$)$$"))),
                   fluidRow(column(2, numericInput(inputId="intercept_Y121",
@@ -286,7 +286,8 @@ shinyUI(fluidPage(
         tabPanel('neue latente PS-Methode',
                  verbatimTextOutput("newLatPS")),
         tabPanel('Vergleich',
-                 DT::dataTableOutput("comp"))
+                 DT::dataTableOutput("comp"),
+                 tableOutput("data"))
       )
       
       #tableOutput("est")
