@@ -1,5 +1,6 @@
 shinyServer(
   function(input, output, session){
+    #set.seed(7833)
     ## some input variables
     n_m_cov <- reactive(input$n_m_cov)
     n_l_cov <- reactive(input$n_l_cov)
@@ -110,7 +111,7 @@ shinyServer(
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, p("0", align = "center")),
-                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%', step=0.01)))
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_zeta, width='100%', step=0.01)))
         )
       }else if(n_m_cov() == 1 & n_l_cov() == 2){
         tagList(
@@ -159,7 +160,7 @@ shinyServer(
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, p("0", align = "center")),
-                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%')))
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_zeta, width='100%')))
         )
       }else if(n_m_cov() == 2 & n_l_cov() == 2){
         tagList(
@@ -222,7 +223,7 @@ shinyServer(
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, p("0", align = "center")),
-                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%')))
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_zeta, width='100%')))
         )
       }else if(n_m_cov() == 2 & n_l_cov() == 1){
         tagList(
@@ -271,7 +272,7 @@ shinyServer(
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, p("0", align = "center")),
-                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%')))
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_zeta, width='100%')))
         )
       }else if(n_m_cov() == 0 & n_l_cov() == 2){
         tagList(
@@ -314,7 +315,7 @@ shinyServer(
                    column(1, div('$$)$$'))),
           fluidRow(column(1),
                    column(2, p("0", align = "center")),
-                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_ceta, width='100%')))
+                   column(2, numericInput(inputId="sd_zeta", label=NULL, value=v$v_sd_zeta, width='100%')))
         )
       }
     })
@@ -413,8 +414,8 @@ shinyServer(
          v$v_gamma103 <- 0
          v$v_gamma104 <- 0
          # adapt mean and standard deviance
-         v$v_mean_ceta <-  0
-         v$v_sd_ceta <-  0.35
+         v$v_mean_zeta <-  0
+         v$v_sd_zeta <-  0.35
 
        }else if(c=="axel"){
          #!# problem: redundant code
@@ -448,7 +449,7 @@ shinyServer(
         ######## regression
         # BE AWARE: coefficients of manifest covariates first and then of latent covariates
         # adapt coefficients of baseline function g0
-         v$v_gamma000 <- 0
+         v$v_gamma000 <- 0.4
          v$v_gamma001 <- 0.6
          v$v_gamma002 <- 0.7
         # adapt coefficients for effect function g1
@@ -456,8 +457,8 @@ shinyServer(
          v$v_gamma101 <- 0
          v$v_gamma102 <- 0
         # adapt mean and standard deviance
-         v$v_mean_ceta <- 0
-         v$v_sd_ceta <- 0.7
+         v$v_mean_zeta <- 0
+         v$v_sd_zeta <- 0.7
 
        }else if(c=="raykov"){
         ######## manifest covariate
@@ -482,9 +483,9 @@ shinyServer(
         lapply(1:3, function(i, l=c(2.5, 3.5, 4)) updateNumericInput(session, inputId=paste0("loading_Y", i, "12"),
                                                                          value=l[(i)]))
         # adapt indicators' SDs of both latent covariates
-        lapply(1:3, function(i, l=c(0.22, 0.25, 0.27)) updateNumericInput(session, inputId=paste0("sd_e", i, "11"),
+        lapply(1:3, function(i, l=c(2.2, 2.5, 2.7)) updateNumericInput(session, inputId=paste0("sd_e", i, "11"),
                                                                               value=l[i]))
-        lapply(1:3, function(i, l=c(0.2, 0.3, 0.35)) updateNumericInput(session, inputId=paste0("sd_e", i, "12"),
+        lapply(1:3, function(i, l=c(2, 3, 3.5)) updateNumericInput(session, inputId=paste0("sd_e", i, "12"),
                                                                             value=l[i]))
         # set covariance to 0.5
          v$v_cov_xi1_xi2 <- 0.5
@@ -503,8 +504,8 @@ shinyServer(
          v$v_gamma101 <- 0
          v$v_gamma102 <- 0
         # adapt mean and standard deviance
-        v$v_mean_ceta <- 0
-        v$v_sd_ceta <- 0.3
+        v$v_mean_zeta <- 0
+        v$v_sd_zeta <- 0.3
        }
      })
     
@@ -516,8 +517,9 @@ shinyServer(
 
     ### Simulation of normally distributed independent continuous variables
      #!# problem: please create nicer error message for semidefiniteness
-    df1 <- reactive({
-      set.seed(746)
+    #df1 <- eventReactive(input$go, {
+    df1 <- reactive({  
+      #set.seed(7833)
       if(n_m_cov()==1 & n_l_cov()==1){
         # means
         mean_z1 <- input$mean_z1
@@ -538,7 +540,6 @@ shinyServer(
         }else if(link()=="logit"){
           df$X <- rbinom(N(), 1, df$PrX)
         }
-        print(input$gamma000)
         df$Y <- input$gamma000 + input$gamma001*df$Z1 + input$gamma002*df$Xi1 +
                   (input$gamma100 + input$gamma101*df$Z1 + input$gamma102*df$Xi1)*df$X +
                     rnorm(N(), 0, input$sd_zeta)
@@ -781,131 +782,149 @@ shinyServer(
       # apart from that in case of latent dv now regression estimated with lavaan
       # why Raykov uses the estimated factor scores in addition to his estimated PS - I don't know why
       fit_sem_raykov <- reactive({
-        if(n_m_cov()==1 & n_l_cov()==1){
-          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*estXi1 + c(a03,a13)*MPS', '\n',
-              EtaExists()[[2]],'~ c(a00,a10)*1
-              Z1 ~ c(mZ1_0,mZ1_1)*1
-              estXi1 ~ c(mXi1_0,mXi1_1)*1
-              MPS ~ c(mMPS_0,mMPS_1)*1
-
-              group % c(gw0,gw1)*w
-              N := exp(gw0) + exp(gw1)
-              relfreq0 := exp(gw0)/N
-              relfreq1 := exp(gw1)/N
-              
-              mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
-              mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
-              mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
-              
-              g10 := a10 - a00
-              g11 := a11 - a01
-              g12 := a12 - a02
-              g13 := a13 - a03
-              ave := g10 + g11*mZ1 + g12*mXi1 + g13*mMPS
-          ', '\n', EtaExists()[[1]])
-        }else if(n_m_cov()==1 & n_l_cov()==2){
-          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*estXi1 + c(a03,a13)*estXi2 + c(a04,a14)*MPS', '\n',
-              EtaExists()[[2]],' ~ c(a00,a10)*1
-              Z1 ~ c(mZ1_0,mZ1_1)*1
-              estXi1 ~ c(mXi1_0,mXi1_1)*1
-              estXi2 ~ c(mXi2_0,mXi2_1)*1
-              MPS ~ c(mMPS_0,mMPS_1)*1
-
-              group % c(gw0,gw1)*w
-              N := exp(gw0) + exp(gw1)
-              relfreq0 := exp(gw0)/N
-              relfreq1 := exp(gw1)/N
-              
-              mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
-              mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
-              mXi2 := mXi2_0*relfreq0 + mXi2_1*relfreq1
-              mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
-              
-              g10 := a10 - a00
-              g11 := a11 - a01
-              g12 := a12 - a02
-              g13 := a13 - a03
-              g14 := a14 - a04
-              ave := g10 + g11*mZ1 + g12*mXi1 + g13*mXi2 + g14*mMPS
-          ', '\n', EtaExists()[[1]])
-        }else if(n_m_cov()==2 & n_l_cov()==2){
-          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*Z2 + c(a03,a13)*estXi1 + c(a04,a14)*estXi2 + c(a05,a15)*MPS', '\n',
-              EtaExists()[[2]],'~ c(a00,a10)*1
-              Z1 ~ c(mZ1_0,mZ1_1)*1
-              Z2 ~ c(mZ2_0,mZ2_1)*1
-              estXi1 ~ c(mXi1_0,mXi1_1)*1
-              estXi2 ~ c(mXi2_0,mXi2_1)*1
-              MPS ~ c(mMPS_0,mMPS_1)*1
-
-              group % c(gw0,gw1)*w
-              N := exp(gw0) + exp(gw1)
-              relfreq0 := exp(gw0)/N
-              relfreq1 := exp(gw1)/N
-              
-              mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
-              mZ2 := mZ2_0*relfreq0 + mZ2_1*relfreq1
-              mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
-              mXi2 := mXi2_0*relfreq0 + mXi2_1*relfreq1
-              mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
-              
-              g10 := a10 - a00
-              g11 := a11 - a01
-              g12 := a12 - a02
-              g13 := a13 - a03
-              g14 := a14 - a04
-              g15 := a15 - a05
-              ave := g10 + g11*mZ1 + g12*mZ2 + g13*mXi1 + g14*mXi2 + g15*mMPS
-          ', '\n', EtaExists()[[1]])
-        }else if(n_m_cov()==2 & n_l_cov()==1){
-          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*Z2 + c(a03,a13)*estXi1 + c(a04,a14)*MPS', '\n',
-          EtaExists()[[2]],' ~ c(a00,a10)*1
-          Z1 ~ c(mZ1_0,mZ1_1)*1
-          Z2 ~ c(mZ2_0,mZ2_1)*1
-          estXi1 ~ c(mXi1_0,mXi1_1)*1
-          MPS ~ c(mMPS_0,mMPS_1)*1
-          
-          group % c(gw0,gw1)*w
-          N := exp(gw0) + exp(gw1)
-          relfreq0 := exp(gw0)/N
-          relfreq1 := exp(gw1)/N
-          
-          mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
-          mZ2 := mZ2_0*relfreq0 + mZ2_1*relfreq1
-          mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
-          mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
-          
-          g10 := a10 - a00
-          g11 := a11 - a01
-          g12 := a12 - a02
-          g13 := a13 - a03
-          g14 := a14 - a04
-          ave := g10 + g11*mZ1 + g12*mZ2 + g13*mXi1 + g14*mMPS
-          ', '\n', EtaExists()[[1]])
-        }else if(n_m_cov()==0 & n_l_cov()==2){
-          sem_m <- paste0(EtaExists()[[2]], ' ~ c(a01,a11)*estXi1 + c(a02,a12)*estXi2 + c(a03,a13)*MPS', '\n',
-          EtaExists()[[2]],' ~ c(a00,a10)*1
-          estXi1 ~ c(mXi1_0,mXi1_1)*1
-          estXi2 ~ c(mXi2_0,mXi2_1)*1
-          MPS ~ c(mMPS_0,mMPS_1)*1
-          
-          group % c(gw0,gw1)*w
-          N := exp(gw0) + exp(gw1)
-          relfreq0 := exp(gw0)/N
-          relfreq1 := exp(gw1)/N
-          
-          mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
-          mXi2 := mXi2_0*relfreq0 + mXi2_1*relfreq1
-          mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
-          
-          g10 := a10 - a00
-          g11 := a11 - a01
-          g12 := a12 - a02
-          g13 := a13 - a03
-          ave := g10 + g11*mXi1 + g12*mXi2 + g13*mMPS', '\n', EtaExists()[[1]])
-        }
+          sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*MPS', '\n',
+                          EtaExists()[[2]],'~ c(a00,a10)*1
+                          MPS ~ c(mMPS_0,mMPS_1)*1
+                          
+                          group % c(gw0,gw1)*w
+                          N := exp(gw0) + exp(gw1)
+                          relfreq0 := exp(gw0)/N
+                          relfreq1 := exp(gw1)/N
+                          
+                          mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+                          
+                          g10 := a10 - a00
+                          g11 := a11 - a01
+                          ave := g10 + g11*mMPS
+                          ', '\n', EtaExists()[[1]])
         sem(model=sem_m, data=MPS(), group="X", group.label=c("0","1"))
-        #cat(sem_m)
-      })
+        })
+      # fit_sem_raykov <- reactive({
+      #   if(n_m_cov()==1 & n_l_cov()==1){
+      #     sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*estXi1 + c(a03,a13)*MPS', '\n',
+      #         EtaExists()[[2]],'~ c(a00,a10)*1
+      #         Z1 ~ c(mZ1_0,mZ1_1)*1
+      #         estXi1 ~ c(mXi1_0,mXi1_1)*1
+      #         MPS ~ c(mMPS_0,mMPS_1)*1
+      # 
+      #         group % c(gw0,gw1)*w
+      #         N := exp(gw0) + exp(gw1)
+      #         relfreq0 := exp(gw0)/N
+      #         relfreq1 := exp(gw1)/N
+      #         
+      #         mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
+      #         mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
+      #         mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+      #         
+      #         g10 := a10 - a00
+      #         g11 := a11 - a01
+      #         g12 := a12 - a02
+      #         g13 := a13 - a03
+      #         ave := g10 + g11*mZ1 + g12*mXi1 + g13*mMPS
+      #     ', '\n', EtaExists()[[1]])
+      #   }else if(n_m_cov()==1 & n_l_cov()==2){
+      #     sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*estXi1 + c(a03,a13)*estXi2 + c(a04,a14)*MPS', '\n',
+      #         EtaExists()[[2]],' ~ c(a00,a10)*1
+      #         Z1 ~ c(mZ1_0,mZ1_1)*1
+      #         estXi1 ~ c(mXi1_0,mXi1_1)*1
+      #         estXi2 ~ c(mXi2_0,mXi2_1)*1
+      #         MPS ~ c(mMPS_0,mMPS_1)*1
+      # 
+      #         group % c(gw0,gw1)*w
+      #         N := exp(gw0) + exp(gw1)
+      #         relfreq0 := exp(gw0)/N
+      #         relfreq1 := exp(gw1)/N
+      #         
+      #         mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
+      #         mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
+      #         mXi2 := mXi2_0*relfreq0 + mXi2_1*relfreq1
+      #         mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+      #         
+      #         g10 := a10 - a00
+      #         g11 := a11 - a01
+      #         g12 := a12 - a02
+      #         g13 := a13 - a03
+      #         g14 := a14 - a04
+      #         ave := g10 + g11*mZ1 + g12*mXi1 + g13*mXi2 + g14*mMPS
+      #     ', '\n', EtaExists()[[1]])
+      #   }else if(n_m_cov()==2 & n_l_cov()==2){
+      #     sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*Z2 + c(a03,a13)*estXi1 + c(a04,a14)*estXi2 + c(a05,a15)*MPS', '\n',
+      #         EtaExists()[[2]],'~ c(a00,a10)*1
+      #         Z1 ~ c(mZ1_0,mZ1_1)*1
+      #         Z2 ~ c(mZ2_0,mZ2_1)*1
+      #         estXi1 ~ c(mXi1_0,mXi1_1)*1
+      #         estXi2 ~ c(mXi2_0,mXi2_1)*1
+      #         MPS ~ c(mMPS_0,mMPS_1)*1
+      # 
+      #         group % c(gw0,gw1)*w
+      #         N := exp(gw0) + exp(gw1)
+      #         relfreq0 := exp(gw0)/N
+      #         relfreq1 := exp(gw1)/N
+      #         
+      #         mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
+      #         mZ2 := mZ2_0*relfreq0 + mZ2_1*relfreq1
+      #         mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
+      #         mXi2 := mXi2_0*relfreq0 + mXi2_1*relfreq1
+      #         mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+      #         
+      #         g10 := a10 - a00
+      #         g11 := a11 - a01
+      #         g12 := a12 - a02
+      #         g13 := a13 - a03
+      #         g14 := a14 - a04
+      #         g15 := a15 - a05
+      #         ave := g10 + g11*mZ1 + g12*mZ2 + g13*mXi1 + g14*mXi2 + g15*mMPS
+      #     ', '\n', EtaExists()[[1]])
+      #   }else if(n_m_cov()==2 & n_l_cov()==1){
+      #     sem_m <- paste0(EtaExists()[[2]], '~ c(a01,a11)*Z1 + c(a02,a12)*Z2 + c(a03,a13)*estXi1 + c(a04,a14)*MPS', '\n',
+      #     EtaExists()[[2]],' ~ c(a00,a10)*1
+      #     Z1 ~ c(mZ1_0,mZ1_1)*1
+      #     Z2 ~ c(mZ2_0,mZ2_1)*1
+      #     estXi1 ~ c(mXi1_0,mXi1_1)*1
+      #     MPS ~ c(mMPS_0,mMPS_1)*1
+      #     
+      #     group % c(gw0,gw1)*w
+      #     N := exp(gw0) + exp(gw1)
+      #     relfreq0 := exp(gw0)/N
+      #     relfreq1 := exp(gw1)/N
+      #     
+      #     mZ1 := mZ1_0*relfreq0 + mZ1_1*relfreq1
+      #     mZ2 := mZ2_0*relfreq0 + mZ2_1*relfreq1
+      #     mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
+      #     mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+      #     
+      #     g10 := a10 - a00
+      #     g11 := a11 - a01
+      #     g12 := a12 - a02
+      #     g13 := a13 - a03
+      #     g14 := a14 - a04
+      #     ave := g10 + g11*mZ1 + g12*mZ2 + g13*mXi1 + g14*mMPS
+      #     ', '\n', EtaExists()[[1]])
+      #   }else if(n_m_cov()==0 & n_l_cov()==2){
+      #     sem_m <- paste0(EtaExists()[[2]], ' ~ c(a01,a11)*estXi1 + c(a02,a12)*estXi2 + c(a03,a13)*MPS', '\n',
+      #     EtaExists()[[2]],' ~ c(a00,a10)*1
+      #     estXi1 ~ c(mXi1_0,mXi1_1)*1
+      #     estXi2 ~ c(mXi2_0,mXi2_1)*1
+      #     MPS ~ c(mMPS_0,mMPS_1)*1
+      #     
+      #     group % c(gw0,gw1)*w
+      #     N := exp(gw0) + exp(gw1)
+      #     relfreq0 := exp(gw0)/N
+      #     relfreq1 := exp(gw1)/N
+      #     
+      #     mXi1 := mXi1_0*relfreq0 + mXi1_1*relfreq1
+      #     mXi2 := mXi2_0*relfreq0 + mXi2_1*relfreq1
+      #     mMPS := mMPS_0*relfreq0 + mMPS_1*relfreq1
+      #     
+      #     g10 := a10 - a00
+      #     g11 := a11 - a01
+      #     g12 := a12 - a02
+      #     g13 := a13 - a03
+      #     ave := g10 + g11*mXi1 + g12*mXi2 + g13*mMPS', '\n', EtaExists()[[1]])
+      #   }
+      #   sem(model=sem_m, data=MPS(), group="X", group.label=c("0","1"))
+      #   #cat(sem_m)
+      # })
 
 
     ################################# proved EffectLiteR approach ############################################
@@ -936,12 +955,12 @@ shinyServer(
       })
       fit_propScores <- reactive({
         if(n_l_cov()==1){
-          mm <- 'xi1 =~ 1*Y111 + Y211 + Y311
+          mm <- 'xi1 =~ Y111 + Y211 + Y311
                 Y111 ~ 0*1
                 xi1 ~ NA*1
               '
         }else if(n_l_cov()==2){
-          mm <- 'xi1 =~ 1*Y111 + Y211 + Y311
+          mm <- 'xi1 =~ Y111 + Y211 + Y311
             xi2 =~ 1*Y112 + Y212 + Y312
           Y111 ~ 0*1
           xi1 ~ NA*1
@@ -1112,19 +1131,24 @@ shinyServer(
     
     
       ############################################ Output for UI ############################################
-    # Output Raykov
-      output$raykov <- renderPrint({
-        summary(fit_sem_raykov())
+      # Output Propensity-Score - Regression (nur mal zur Überprüfung des Modelfit)
+      output$ps <- renderPrint({
+        summary(fit_propScores(), fit.measures=T)
       })
-    
+      
+      # Output Raykov
+      output$raykov <- renderPrint({
+        summary(fit_sem_raykov(), fit.measures=T)
+      })
+
     # Output EffectLiteR
       output$effectLite <- renderPrint({
         summary(fit_sem_effectLite()@results@lavresults, fit.measures=T)
       })
-      
-    # Output new Method  
+
+    # Output new Method
       output$newLatPS <- renderPrint({
-        summary(fit_sem_latProp())
+        summary(fit_sem_latProp(), fit.measures=T)
 
       })
     

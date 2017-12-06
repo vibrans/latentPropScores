@@ -62,7 +62,7 @@ shinyUI(fluidPage(
                                                    label=NULL, value=1, width='100%')),
                             column(2),
                             column(2, p("0", align = "center")),
-                            column(2, numericInput(inputId="sd_e111",
+                            column(3, numericInput(inputId="sd_e111",
                                                label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01))),
                    h3(strong("Y\u2082\u2081\u2081 =")),
                    fluidRow(column(2, h4("\u03BD\u2082\u2081\u2081")),
@@ -80,7 +80,7 @@ shinyUI(fluidPage(
                                                    label=NULL, value=1, width='100%')),
                             column(2),
                             column(2, p("0", align = "center")),
-                            column(2, numericInput(inputId="sd_e211",
+                            column(3, numericInput(inputId="sd_e211",
                                                label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01))),
                    h3(strong("Y\u2083\u2081\u2081 =")),
                    fluidRow(column(2, h4("\u03BD\u2083\u2081\u2081")),
@@ -98,7 +98,7 @@ shinyUI(fluidPage(
                                                    label=NULL, value=1, width='100%')),
                             column(2),
                             column(2, p("0", align = "center")),
-                            column(2, numericInput(inputId="sd_e311",
+                            column(3, numericInput(inputId="sd_e311",
                                                label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01)))
                  ),
                  br(),
@@ -126,7 +126,7 @@ shinyUI(fluidPage(
                                                    label=NULL, value=1, width='100%')),
                             column(2),
                             column(2, p("0", align = "center")),
-                            column(2, numericInput(inputId="sd_e112",
+                            column(3, numericInput(inputId="sd_e112",
                                                label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01))),
                    h3(strong("Y\u2082\u2081\u2082")),
                    fluidRow(column(2, h4("\u03BD\u2082\u2081\u2082")),
@@ -144,7 +144,7 @@ shinyUI(fluidPage(
                                                    label=NULL, value=1, width='100%')),
                             column(2),
                             column(2, p("0", align = "center")),
-                            column(2, numericInput(inputId="sd_e212",
+                            column(3, numericInput(inputId="sd_e212",
                                                    label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01))),
                    h3(strong("Y\u2083\u2081\u2082")),
                    fluidRow(column(2, h4("\u03BD\u2083\u2081\u2082")),
@@ -162,7 +162,7 @@ shinyUI(fluidPage(
                                                    label=NULL, value=1, width='100%')),
                             column(2),
                             column(2, p("0", align = "center")),
-                            column(2, numericInput(inputId="sd_e312",
+                            column(3, numericInput(inputId="sd_e312",
                                                    label=NULL, value=1, min=0.001, max=3, width='100%', step=0.01)))
                  ),
                  br(),
@@ -277,6 +277,8 @@ shinyUI(fluidPage(
     #########################################################################################################
     mainPanel(
       tabsetPanel(
+        tabPanel('Probitregression',
+                 verbatimTextOutput("ps")),
         tabPanel('Raykov-Methode',
                  verbatimTextOutput("raykov")),
         tabPanel('EffectLiteR-Methode',
